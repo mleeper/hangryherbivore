@@ -1,0 +1,5 @@
+Django>=5.2,<5.3
+wagtail>=7.2,<7.3
+python-dotenv>=1.2.1
+django-cors-headers>=4.9.0
+wagtail-headless-preview>=0.8.0

@@ -1,0 +1,9 @@
+# Env files
+.env
+
+# Virtual Environment
+env
+
+# Front End
+frontend/node_modules
+frontend/package-lock.json
