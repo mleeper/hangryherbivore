@@ -6,9 +6,9 @@ from .serializers import RecipeSerializer
 class RecipeListAPI(ListAPIView):
     serializer_class = RecipeSerializer
 
-    def get_queryset(self):
-        return RecipePage.objects.live().public()
-
+    def get_queryset(self):	
+        return RecipePage.objects.all().live().specific()
+        #return RecipePage.objects.live().public()
 
 class RecipeDetailAPI(RetrieveAPIView):
     serializer_class = RecipeSerializer

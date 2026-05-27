@@ -7,3 +7,8 @@ env
 # Front End
 frontend/node_modules
 frontend/package-lock.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class

@@ -1,11 +1,13 @@
 from django.db import models
+from wagtail.api import APIField
+from wagtail import blocks
 from wagtail.models import Page
 from wagtail.fields import StreamField, RichTextField
 from wagtail.images.models import Image
-from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel
+from wagtail.admin.panels import FieldPanel, MultipleChooserPanel, MultiFieldPanel, InlinePanel
 from modelcluster.fields import ParentalKey
 from wagtail.snippets.models import register_snippet
-
+from wagtail.search import index
 
 # ----------------------------
 # Recipe Index
@@ -26,8 +28,13 @@ class RecipeIndexPage(Page):
 # ----------------------------
 
 @register_snippet
-class Ingredient(models.Model):
+class Ingredient(index.Indexed, models.Model):
     name = models.CharField(max_length=100)
+
+    search_fields = [
+        index.SearchField('name'),
+        index.AutocompleteField('name'),
+    ]
 
     panels = [
         FieldPanel("name")
@@ -40,7 +47,6 @@ class Ingredient(models.Model):
 # ----------------------------
 # Recipe Ingredient Relation
 # ----------------------------
-
 class RecipeIngredient(models.Model):
     page = ParentalKey(
         "recipes.RecipePage",
@@ -50,11 +56,16 @@ class RecipeIngredient(models.Model):
 
     ingredient = models.ForeignKey(
         "recipes.Ingredient",
-        on_delete=models.CASCADE
+	null=True,
+	blank=True,
+        on_delete=models.CASCADE,
+        related_name="+"
     )
 
     amount = models.CharField(
         max_length=50,
+	blank=True,
+	null=True,
         help_text="e.g. 1 cup, 200g, 2 tbsp"
     )
 
@@ -62,7 +73,6 @@ class RecipeIngredient(models.Model):
         FieldPanel("amount"),
         FieldPanel("ingredient")
     ]
-
 
 # ----------------------------
 # Instruction Step
@@ -178,7 +188,7 @@ class RecipePage(Page):
         blank=True,
         default="Get My Free Budget Meal Plan"
     )
-
+    
 
     # ---------- Admin ----------
     content_panels = Page.content_panels + [
@@ -230,10 +240,10 @@ class RecipePage(Page):
             FieldPanel("lead_magnet_cta"),
         ], heading="Email Growth"),
 
-
-        InlinePanel(
+        MultipleChooserPanel(
             "recipe_ingredients",
             label="Ingredients",
+            chooser_field_name="ingredient",
             min_num=1
         ),
 
@@ -244,6 +254,10 @@ class RecipePage(Page):
         ),
     ]
 
+    #api_fields = [
+    #    APIField('ingredients'),           # Full JSON for your main Astro component
+    #    APIField('schema_ingredients'),    # Clean strings for your SEO Schema logic
+    #]
 
     # ---------- Helpers ----------
 
@@ -264,7 +278,6 @@ class RecipePage(Page):
             f"{i.amount} {i.ingredient.name}"
             for i in self.recipe_ingredients.all()
         ]
-
 
     def get_schema_instructions(self):
         return [
