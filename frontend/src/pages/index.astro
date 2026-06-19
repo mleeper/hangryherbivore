@@ -7,5 +7,198 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
-	<Welcome />
+	  <!-- HERO -->
+  <section style="max-width:1100px; margin: 0 auto; padding: 5rem 2rem 4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+    <div class="hero-content">
+      <span class="hero-eyebrow">🌱 Plant-based on a budget</span>
+      <h1>
+        Affordable Vegan Meals That <em>Actually</em> Fill You Up
+      </h1>
+      <p>
+        Practical homemade recipes built around real grocery store ingredients —
+        not specialty store splurges.
+      </p>
+      <div class="btn-row">
+        <a href="/recipes" class="btn-primary">Browse Recipes</a>
+        <a href="/meal-plan" class="btn-outline">Get $40 Meal Plan</a>
+      </div>
+    </div>
+
+    <div class="hero-image-wrap">
+      <div class="hero-img">
+        <div class="hero-img-placeholder">Add hero image here</div>
+      </div>
+      <div class="hero-badge">
+        <span class="badge-num">200+</span>
+        <span class="badge-label">Free Recipes</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- VALUE BAR -->
+  <div class="value-bar">
+    <div class="value-bar-inner">
+      <span>💸 Under $2 per serving</span>
+      <span class="divider"></span>
+      <span>⏱ 30-minute meals</span>
+      <span class="divider"></span>
+      <span>🥦 High-protein options</span>
+      <span class="divider"></span>
+      <span>🧾 Real grocery pricing</span>
+      <span class="divider"></span>
+      <span>♻️ Minimal food waste</span>
+    </div>
+  </div>
+
+
+  <!-- FEATURED RECIPES -->
+  <section class="featured">
+    <div class="section-header">
+      <h2>Start With These Budget Staples</h2>
+      <a href="/recipes">View all recipes →</a>
+    </div>
+
+    <div class="recipe-grid">
+      <a href="#" class="recipe-card">
+        <div class="recipe-card-img"></div>
+        <div class="recipe-card-body">
+          <h3>Lentil Taco Bowls</h3>
+          <div class="recipe-meta">
+            <span class="tag">⏱ 25 min</span>
+            <span class="tag">💸 $1.85/serving</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="recipe-card">
+        <div class="recipe-card-img"></div>
+        <div class="recipe-card-body">
+          <h3>One-Pot Chickpea Curry</h3>
+          <div class="recipe-meta">
+            <span class="tag">⏱ 30 min</span>
+            <span class="tag">💸 $2.10/serving</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="recipe-card">
+        <div class="recipe-card-img"></div>
+        <div class="recipe-card-body">
+          <h3>Tofu Stir Fry</h3>
+          <div class="recipe-meta">
+            <span class="tag">⏱ 20 min</span>
+            <span class="tag">💸 $1.25/serving</span>
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+
+  <!-- CATEGORIES -->
+  <section class="categories">
+    <div class="categories-inner">
+      <div class="section-header">
+        <h2>Browse by Category</h2>
+        <a href="/recipes">All categories →</a>
+      </div>
+
+      <div class="cat-grid">
+        <a href="#" class="cat-card">
+          <div class="cat-icon">🍳</div>
+          <div>
+            <h3>Cheap Breakfasts</h3>
+            <p>Start the day under $1</p>
+          </div>
+        </a>
+        <a href="#" class="cat-card">
+          <div class="cat-icon">🥘</div>
+          <div>
+            <h3>One-Pot Dinners</h3>
+            <p>Less washing up, more eating</p>
+          </div>
+        </a>
+        <a href="#" class="cat-card">
+          <div class="cat-icon">💪</div>
+          <div>
+            <h3>High Protein</h3>
+            <p>Beans, lentils & tofu done right</p>
+          </div>
+        </a>
+        <a href="#" class="cat-card">
+          <div class="cat-icon">📦</div>
+          <div>
+            <h3>Meal Prep</h3>
+            <p>Cook once, eat all week</p>
+          </div>
+        </a>
+        <a href="#" class="cat-card">
+          <div class="cat-icon">👨‍👩‍👧</div>
+          <div>
+            <h3>Family-Friendly</h3>
+            <p>Crowd-pleasers on a budget</p>
+          </div>
+        </a>
+        <a href="#" class="cat-card">
+          <div class="cat-icon">🛒</div>
+          <div>
+            <h3>Grocery Guides</h3>
+            <p>Shop smarter, waste less</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- HOW IT WORKS -->
+  <section class="how">
+    <div class="how-grid">
+      <div class="how-left">
+        <h2>How I Keep Vegan Meals Affordable</h2>
+        <p>
+          Eating plant-based shouldn't mean buying specialty ingredients every week.
+          Everything here is built around five simple principles that keep the grocery
+          bill low and the meals genuinely satisfying.
+        </p>
+        <a href="/about" class="btn-outline">Read the full story</a>
+      </div>
+      <div class="tips-list">
+        <div class="tip">
+          <div class="tip-icon">🌾</div>
+          <div class="tip-text">
+            <strong>Staple-first cooking</strong>
+            <span>Rice, beans, lentils, and pasta form the backbone of every meal.</span>
+          </div>
+        </div>
+        <div class="tip">
+          <div class="tip-icon">🚫</div>
+          <div class="tip-text">
+            <strong>No overpriced substitutes</strong>
+            <span>Real whole foods, not $8 vegan cheese or fake meat.</span>
+          </div>
+        </div>
+        <div class="tip">
+          <div class="tip-icon">📋</div>
+          <div class="tip-text">
+            <strong>Planned leftovers</strong>
+            <span>Every recipe is designed with the next day's lunch in mind.</span>
+          </div>
+        </div>
+        <div class="tip">
+          <div class="tip-icon">🧂</div>
+          <div class="tip-text">
+            <strong>Simple seasoning strategy</strong>
+            <span>Build a small spice kit once, use it in everything.</span>
+          </div>
+        </div>
+        <div class="tip">
+          <div class="tip-icon">♻️</div>
+          <div class="tip-text">
+            <strong>Minimal food waste</strong>
+            <span>Recipes cross-reference ingredients so nothing goes to waste.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </Layout>

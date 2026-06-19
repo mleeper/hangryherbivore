@@ -1,5 +1,5 @@
 {
-  "name": "",
+  "name": "Hangry Herbivore",
   "type": "module",
   "version": "0.0.1",
   "engines": {
@@ -12,6 +12,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^6.1.4"
+    "@tailwindcss/vite": "^4.2.4",
+    "astro": "^6.1.4",
+    "tailwindcss": "^4.2.4"
   }
 }
