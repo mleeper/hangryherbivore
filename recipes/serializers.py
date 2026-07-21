@@ -7,7 +7,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = serializers.SerializerMethodField()
     instructions = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
-
+    category = serializers.SerializerMethodField()
 
     class Meta:
         model = RecipePage
@@ -20,11 +20,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             "total_time",
             "servings",
             "cost_per_serving",
-            "calories",
-            "protein",
-            "carbs",
-            "fat",
-            "cuisine",
             "category",
             "difficulty",
             "affiliate_product",
@@ -48,4 +43,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if obj.hero_image:
             return obj.hero_image.file.url
         return None
+    
+    def get_category(self, obj):
+        return obj.get_schema_categories()
 

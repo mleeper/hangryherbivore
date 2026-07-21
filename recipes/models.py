@@ -65,6 +65,8 @@ class RecipeIndexPage(Page):
 @register_snippet
 class Category(index.Indexed, models.Model):
     name = models.CharField(max_length=100)
+    icon = models.CharField(max_length=10)
+    description = models.CharField(max_length=100)
 
     search_fields = [
 	index.SearchField('name'),
@@ -83,10 +85,10 @@ class RecipeCategory(models.Model):
     )
     category = models.ForeignKey(
     	'recipes.Category',
-	blank=True,
-	null=True,
-	related_name='+',
-	on_delete=models.CASCADE
+	    blank=True,
+        null=True,
+        related_name='+',
+        on_delete=models.CASCADE
     )
     
     panels = [
@@ -137,17 +139,10 @@ class IngredientNutrientRelationship(Orderable):
         decimal_places=2, 
         default=0.00
     )
-
-    serving_size = models.DecimalField(
-        max_digits=6, 
-        decimal_places=2, 
-        default=0.00
-    )
     panels = [
         # Explicit widget declaration forces the search box to always be visible
         FieldPanel('nutrient', widget=AdminSnippetChooser(Nutrient)),
         FieldPanel('amount'),
-	FieldPanel('serving_size'),
     ]
 
 
@@ -158,7 +153,18 @@ class IngredientNutrientRelationship(Orderable):
 @register_snippet
 class Ingredient(index.Indexed, ClusterableModel):
     name = models.CharField(max_length=100)
-    
+    serving_size = models.DecimalField(
+        max_digits=6, 
+        decimal_places=2, 
+        default=0.00
+    )
+    serving_unit = models.CharField( 
+        max_length=20,
+        choices=UNIT_CHOICES,
+        blank=True,
+        null=True,
+        help_text="Standardized unit of measurement"
+    )
     search_fields = [
         index.SearchField('name'),
         index.AutocompleteField('name'),
@@ -166,6 +172,8 @@ class Ingredient(index.Indexed, ClusterableModel):
 
     panels = [
         FieldPanel("name"),
+        FieldPanel("serving_size"),
+        FieldPanel("serving_unit"),
 	# The hybrid approach: Bulk choice panel mapped to an inline relationship
         MultipleChooserPanel(
             'ingredient_nutrients',        # Matches the related_name on the bridge model
@@ -175,7 +183,7 @@ class Ingredient(index.Indexed, ClusterableModel):
     ]
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.serving_unit})"
 
 
 # ----------------------------
@@ -190,8 +198,8 @@ class RecipeIngredient(models.Model):
 
     ingredient = models.ForeignKey(
         "recipes.Ingredient",
-	null=True,
-	blank=True,
+	    null=True,
+	    blank=True,
         on_delete=models.CASCADE,
         related_name="+"
     )
@@ -212,8 +220,8 @@ class RecipeIngredient(models.Model):
     panels = [
         FieldPanel("ingredient"),
         FieldPanel("quantity"),
-	FieldPanel("unit"),
-	FieldPanel("note"),
+	    FieldPanel("unit"),
+	    FieldPanel("note"),
     ]
 
 
@@ -296,15 +304,15 @@ class RecipePage(Page):
 
 
     # ---------- Nutrition ----------
-    calories = models.PositiveIntegerField(null=True, blank=True)
-    protein = models.PositiveIntegerField(null=True, blank=True)
-    carbs = models.PositiveIntegerField(null=True, blank=True)
-    fat = models.PositiveIntegerField(null=True, blank=True)
+    # calories = models.PositiveIntegerField(null=True, blank=True)
+    # protein = models.PositiveIntegerField(null=True, blank=True)
+    # carbs = models.PositiveIntegerField(null=True, blank=True)
+    # fat = models.PositiveIntegerField(null=True, blank=True)
 
 
     # ---------- Classification ----------
-    cuisine = models.CharField(max_length=50, blank=True)
-    #category = models.CharField(max_length=50, default="Dinner")
+    # cuisine = models.CharField(max_length=50, blank=True)
+    # category = models.CharField(max_length=50, default="Dinner")
     difficulty = models.CharField(
         max_length=20,
         choices=[
@@ -351,17 +359,16 @@ class RecipePage(Page):
         ], heading="Timing & Cost"),
 
 
-        MultiFieldPanel([
-            FieldPanel("calories"),
-            FieldPanel("protein"),
-            FieldPanel("carbs"),
-            FieldPanel("fat"),
-        ], heading="Nutrition"),
+        # MultiFieldPanel([
+        #     FieldPanel("calories"),
+        #     FieldPanel("protein"),
+        #     FieldPanel("carbs"),
+        #     FieldPanel("fat"),
+        # ], heading="Nutrition"),
 
 
         MultiFieldPanel([
-            FieldPanel("cuisine"),
-            #FieldPanel("category"),
+            # FieldPanel("cuisine"),
             FieldPanel("difficulty"),
         ], heading="Classification"),
 	
@@ -427,47 +434,52 @@ class RecipePage(Page):
             if not i.ingredient:
                 continue
             
-        # Safely capture your clean numeric quantity
-        recipe_qty = float(i.quantity) if i.quantity is not None else 0.0
-            
-        ingredient_data = {
-            "name": i.ingredient.name,
-            "quantity": recipe_qty,
-            "unit": i.get_unit_display() if i.unit else "", # Returns human-friendly text like "Fluid Ounces (fl oz)"
-            "unit_code": i.unit or "",                       # Returns the raw database string like "fl_oz"
-            "note": i.note or "",
-            "nutrients": []
-        }
+            # Safely capture your clean numeric quantity
+            recipe_qty = float(i.quantity) if i.quantity is not None else 0.0
+            base_serving_size = float(i.ingredient.serving_size) if i.ingredient.serving_size is not None else 0.0
+
+            ingredient_data = {
+                "name": i.ingredient.name,
+                "quantity": recipe_qty,
+                "unit": i.get_unit_display() if i.unit else "", # Returns human-friendly text like "Fluid Ounces (fl oz)"
+                "unit_code": i.unit or "",                       # Returns the raw database string like "fl_oz"
+                "note": i.note or "",
+                "nutrients": []
+            }
         
-        nutrients_list = i.ingredient.ingredient_nutrients.values(
-            'nutrient__name', 
-            'amount', 
-            'nutrient__unit',
-            'serving_size'
-        )
+            nutrients_list = i.ingredient.ingredient_nutrients.values(
+                'nutrient__name', 
+                'amount', 
+                'nutrient__unit',
+                'serving_size'
+            )
         
-        for n in nutrients_list:
-            serving_size_float = float(n['serving_size']) if n['serving_size'] is not None else 0.0
-            base_amount_float = float(n['amount']) if n['amount'] is not None else 0.0
-            
             # Straightforward, bulletproof math scaling
-            if serving_size_float > 0 and recipe_qty > 0:
-                scale_factor = recipe_qty / serving_size_float
-                scaled_amount = round(base_amount_float * scale_factor, 2)
-            else:
-                scale_factor = 1.0
-                scaled_amount = base_amount_float
+            scale_factor = recipe_qty / base_serving_size if base_serving_size > 0 and recipe_qty > 0 else 1.0
+        
+            for n in nutrients_list:
+                # serving_size_float = float(n['serving_size']) if n['serving_size'] is not None else 0.0
+                base_amount_float = float(n['amount']) if n['amount'] is not None else 0.0
+                scaled_amount = base_amount_float if scale_factor is 1.0 else round(base_amount_float * scale_factor, 2)
+                
+                # # Straightforward, bulletproof math scaling
+                # if serving_size_float > 0 and recipe_qty > 0:
+                #     scale_factor = recipe_qty / serving_size_float
+                #     scaled_amount = round(base_amount_float * scale_factor, 2)
+                # else:
+                #     scale_factor = 1.0
+                #     scaled_amount = base_amount_float
+                
+                ingredient_data["nutrients"].append({
+                    "name": n['nutrient__name'],
+                    "unit": n['nutrient__unit'],
+                    "base_serving_size": serving_size_float,
+                    "base_nutrient_amount": base_amount_float,
+                    "scaled_nutrient_amount": scaled_amount,
+                    "scale_factor_applied": round(scale_factor, 2)
+                })
             
-            ingredient_data["nutrients"].append({
-                "name": n['nutrient__name'],
-                "unit": n['nutrient__unit'],
-                "base_serving_size": serving_size_float,
-                "base_nutrient_amount": base_amount_float,
-                "scaled_nutrient_amount": scaled_amount,
-                "scale_factor_applied": round(scale_factor, 2)
-            })
-            
-        data.append(ingredient_data)
+            data.append(ingredient_data)
         
         return data
     
@@ -497,5 +509,14 @@ class RecipePage(Page):
                 "text": step.instruction
             }
             for step in self.steps.all()
+        ]
+    
+    def get_schema_categories(self):
+        return [
+            {
+                "name": category.name,
+                "icon": category.icon,
+            }
+            for category in self.recipe_category.all()
         ]
 

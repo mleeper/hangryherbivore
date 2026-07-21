@@ -17,6 +17,7 @@ urlpatterns = [
     path("search/", search_views.search, name="search"),
     path('api/', api_router.urls),
     path('', include('recipes.urls')),
+    path('', include('home.urls')),
 ]
 
 

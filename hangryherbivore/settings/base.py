@@ -33,10 +33,10 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 # Application definition
 
 INSTALLED_APPS = [
-    "home",
     "recipes",
     "blog",
     "search",
+    "home",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.embeds",
