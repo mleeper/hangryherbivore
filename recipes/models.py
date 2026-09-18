@@ -45,6 +45,86 @@ CATEGORIES = [
     ('quick_meals', 'Under 30 Minutes'),
     ('high_protein', 'High Protein'),
 ]
+
+@register_snippet
+class MeasurementConversion(models.Model):
+    """Common measurement conversions for recipe ingredients"""
+    
+    CATEGORY_CHOICES = [
+        ('flour_powder', 'Flours & Powders'),
+        ('grains_legumes', 'Grains & Legumes'),
+        ('liquids', 'Liquids'),
+        ('sweeteners', 'Sweeteners'),
+        ('nuts_seeds', 'Nuts & Seeds'),
+        ('spices', 'Spices'),
+        ('other', 'Other'),
+    ]
+
+    ingredient_name = models.CharField(
+        max_length=255,
+        help_text="e.g. All Purpose Flour"
+    )
+    category = models.CharField(
+        max_length=50,
+        choices=CATEGORY_CHOICES,
+        default='other'
+    )
+    us_quantity = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        help_text="US volume amount e.g. 1"
+    )
+    us_unit = models.CharField(
+        max_length=50,
+        help_text="US unit e.g. cup, tbsp, tsp"
+    )
+    metric_quantity = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        help_text="Metric amount e.g. 120"
+    )
+    metric_unit = models.CharField(
+        max_length=10,
+        choices=[('g', 'Grams'), ('ml', 'Milliliters')],
+        default='g'
+    )
+    notes = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Optional note e.g. sifted, packed, chopped"
+    )
+    sort_order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['category', 'sort_order', 'ingredient_name']
+        verbose_name = 'Measurement Conversion'
+        verbose_name_plural = 'Measurement Conversions'
+
+    def __str__(self):
+        return f"{self.ingredient_name} — {self.us_quantity} {self.us_unit} = {self.metric_quantity}{self.metric_unit}"
+
+    search_fields = [
+        index.SearchField('ingredient_name'),
+        index.FilterField('category'),
+        index.FilterField('metric_unit'),
+    ]
+
+    panels = [
+        FieldPanel('ingredient_name'),
+        FieldPanel('category'),
+        MultiFieldPanel([
+            FieldPanel('us_quantity'),
+            FieldPanel('us_unit'),
+        ], heading='US Measurement'),
+        MultiFieldPanel([
+            FieldPanel('metric_quantity'),
+            FieldPanel('metric_unit'),
+        ], heading='Metric Measurement'),
+        FieldPanel('notes'),
+        FieldPanel('sort_order'),
+    ]
+
 # ----------------------------
 # Recipe Index
 # ----------------------------
@@ -135,7 +215,7 @@ class IngredientNutrientRelationship(Orderable):
     )
     # The unique numeric weight for this specific ingredient
     amount = models.DecimalField(
-        max_digits=6, 
+        max_digits=10, 
         decimal_places=2, 
         default=0.00
     )
@@ -153,27 +233,14 @@ class IngredientNutrientRelationship(Orderable):
 @register_snippet
 class Ingredient(index.Indexed, ClusterableModel):
     name = models.CharField(max_length=100)
-    serving_size = models.DecimalField(
-        max_digits=6, 
-        decimal_places=2, 
-        default=0.00
-    )
-    serving_unit = models.CharField( 
-        max_length=20,
-        choices=UNIT_CHOICES,
-        blank=True,
-        null=True,
-        help_text="Standardized unit of measurement"
-    )
+    is_liquid = models.BooleanField(default=False)
     search_fields = [
         index.SearchField('name'),
         index.AutocompleteField('name'),
     ]
-
     panels = [
         FieldPanel("name"),
-        FieldPanel("serving_size"),
-        FieldPanel("serving_unit"),
+        FieldPanel("is_liquid"),
 	# The hybrid approach: Bulk choice panel mapped to an inline relationship
         MultipleChooserPanel(
             'ingredient_nutrients',        # Matches the related_name on the bridge model
@@ -183,7 +250,7 @@ class Ingredient(index.Indexed, ClusterableModel):
     ]
 
     def __str__(self):
-        return f"{self.name} ({self.serving_unit})"
+        return f"{self.name}"
 
 
 # ----------------------------
@@ -195,7 +262,6 @@ class RecipeIngredient(models.Model):
         related_name="recipe_ingredients",
         on_delete=models.CASCADE
     )
-
     ingredient = models.ForeignKey(
         "recipes.Ingredient",
 	    null=True,
@@ -204,13 +270,6 @@ class RecipeIngredient(models.Model):
         related_name="+"
     )
     quantity = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    unit = models.CharField(
-        max_length=20,
-        choices=UNIT_CHOICES,
-        blank=True,
-        null=True,
-        help_text="Standardized unit of measurement"
-    )
     note = models.CharField(
         max_length=120,
         blank=True,
@@ -220,7 +279,6 @@ class RecipeIngredient(models.Model):
     panels = [
         FieldPanel("ingredient"),
         FieldPanel("quantity"),
-	    FieldPanel("unit"),
 	    FieldPanel("note"),
     ]
 
@@ -436,13 +494,13 @@ class RecipePage(Page):
             
             # Safely capture your clean numeric quantity
             recipe_qty = float(i.quantity) if i.quantity is not None else 0.0
-            base_serving_size = float(i.ingredient.serving_size) if i.ingredient.serving_size is not None else 0.0
+            base_serving_size = 100
 
             ingredient_data = {
                 "name": i.ingredient.name,
                 "quantity": recipe_qty,
-                "unit": i.get_unit_display() if i.unit else "", # Returns human-friendly text like "Fluid Ounces (fl oz)"
-                "unit_code": i.unit or "",                       # Returns the raw database string like "fl_oz"
+                "unit": "g",
+                "is_liquid": i.ingredient.is_liquid,
                 "note": i.note or "",
                 "nutrients": []
             }
@@ -451,16 +509,15 @@ class RecipePage(Page):
                 'nutrient__name', 
                 'amount', 
                 'nutrient__unit',
-                'serving_size'
             )
         
             # Straightforward, bulletproof math scaling
-            scale_factor = recipe_qty / base_serving_size if base_serving_size > 0 and recipe_qty > 0 else 1.0
+            scale_factor = recipe_qty / base_serving_size
         
             for n in nutrients_list:
                 # serving_size_float = float(n['serving_size']) if n['serving_size'] is not None else 0.0
                 base_amount_float = float(n['amount']) if n['amount'] is not None else 0.0
-                scaled_amount = base_amount_float if scale_factor is 1.0 else round(base_amount_float * scale_factor, 2)
+                scaled_amount = round(base_amount_float * scale_factor, 2)
                 
                 # # Straightforward, bulletproof math scaling
                 # if serving_size_float > 0 and recipe_qty > 0:
@@ -473,7 +530,6 @@ class RecipePage(Page):
                 ingredient_data["nutrients"].append({
                     "name": n['nutrient__name'],
                     "unit": n['nutrient__unit'],
-                    "base_serving_size": serving_size_float,
                     "base_nutrient_amount": base_amount_float,
                     "scaled_nutrient_amount": scaled_amount,
                     "scale_factor_applied": round(scale_factor, 2)
@@ -499,6 +555,7 @@ class RecipePage(Page):
                     totals[name] = {"amount": 0.0, "unit": unit}
                 
                 totals[name]["amount"] = round(totals[name]["amount"] + amount, 2)
+                totals[name]["unit"] = unit
             
         return totals
 
