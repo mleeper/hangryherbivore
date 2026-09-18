@@ -233,10 +233,11 @@ class HomePage(Page):
     def get_schema_value_bar(self):
         return [
             {
-                "icon": item.icon,
-                "text": item.text,
+                "icon": item.value_bar_item.icon,
+                "text": item.value_bar_item.text,
             }
             for item in self.homepage_value_bar.all()
+            if item.value_bar_item
         ]
     
     def get_schema_hero_cta(self):
@@ -269,11 +270,12 @@ class HomePage(Page):
     def get_schema_how_it_works_list(self):
         return [
             {
-                "icon": item.icon,
-                "title": item.title,
-                "text": item.text,
+                "icon": item.how_it_works_item.icon,
+                "title": item.how_it_works_item.title,
+                "text": item.how_it_works_item.text,
             }
             for item in self.how_it_works_list.all()
+            if item.how_it_works_item
         ]
 
     def get_schema_categories(self):

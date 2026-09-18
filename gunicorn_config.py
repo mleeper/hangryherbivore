@@ -8,7 +8,8 @@ bind = "127.0.0.1:8000"  # Use '0.0.0.0:8000' for external testing
 
 # The number of worker processes for handling requests
 workers = multiprocessing.cpu_count() * 2 + 1
-timeout=30
+threads = 2
+timeout=120
 
 # Disable code reload
 reload = False
