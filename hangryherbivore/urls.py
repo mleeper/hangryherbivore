@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/', api_router.urls),
     path('', include('recipes.urls')),
     path('', include('home.urls')),
+    path('', include('blog.urls')),
 ]
 
 

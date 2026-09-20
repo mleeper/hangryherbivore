@@ -168,7 +168,6 @@ class BlogPost(Page):
         ], heading="Categorization"),
     ]
 
-    parent_page_types = ['blog.BlogIndexPage']
     subpage_types = []
 
     api_fields = [
