@@ -1,0 +1,132 @@
+---
+interface Props {
+    title?: string;
+    content?: string;
+    buttonText?: string;
+}
+
+const {
+    title = 'Stop Asking "What\'s for Dinner?"',
+    content = 'Get 7 days of vegan meals under $40 — complete with grocery list and per-serving cost breakdown.',
+    buttonText = 'Send Me the Plan',
+} = Astro.props;
+---
+
+<section class="lead-magnet">
+    <div class="lead-magnet-inner">
+        <span class="pill">Free Download</span>
+        <h2>{title}</h2>
+        <p>{content}</p>
+        <div class="email-form">
+            <input type="email" placeholder="Enter your email address" />
+            <button type="button">{buttonText}</button>
+        </div>
+        <p class="form-note">No spam. Unsubscribe any time.</p>
+    </div>
+</section>
+
+<style>
+    .lead-magnet {
+        background: var(--sage-dark);
+        padding: 5rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .lead-magnet::before {
+        content: '';
+        position: absolute;
+        top: -60px; right: -60px;
+        width: 300px; height: 300px;
+        background: var(--yellow);
+        border-radius: 50%;
+        opacity: 0.08;
+    }
+
+    .lead-magnet-inner {
+        max-width: 560px;
+        margin: 0 auto;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .pill {
+        display: inline-block;
+        background: rgba(240,196,25,0.2);
+        color: var(--yellow);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.4rem 1rem;
+        border-radius: 100px;
+        margin-bottom: 1.25rem;
+    }
+
+    h2 {
+        color: var(--cream);
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    p {
+        color: var(--sage-pale);
+        margin-bottom: 2rem;
+    }
+
+    .email-form {
+        display: flex;
+        gap: 0.75rem;
+        background: rgba(255,255,255,0.1);
+        border: 1.5px solid rgba(255,255,255,0.15);
+        border-radius: 100px;
+        padding: 0.4rem 0.4rem 0.4rem 1.25rem;
+    }
+
+    .email-form input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #fff;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.9375rem;
+    }
+
+    .email-form input::placeholder {
+        color: var(--sage-pale);
+        opacity: 0.7;
+    }
+
+    .email-form button {
+        background: var(--yellow);
+        color: var(--text-dark);
+        font-family: "DM Sans", sans-serif;
+        font-weight: 700;
+        font-size: 0.875rem;
+        border: none;
+        border-radius: 100px;
+        padding: 0.75rem 1.5rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .email-form button:hover { background: var(--yellow-deep); }
+
+    .form-note {
+        font-size: 0.75rem;
+        opacity: 0.7;
+        margin-top: 0.75rem;
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 560px) {
+        .email-form {
+            flex-direction: column;
+            border-radius: 16px;
+            padding: 1rem;
+        }
+        .email-form button { border-radius: 100px; }
+    }
+</style>
