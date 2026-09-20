@@ -1,0 +1,90 @@
+---
+const footerLinks = [
+    { label: 'Recipes', href: '/recipes' },
+    { label: 'Meal Plans', href: '/meal-plan' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'About', href: '/about' },
+    { label: 'Contact', href: '/contact' },
+];
+---
+
+<footer>
+    <div class="footer-inner">
+        <span class="footer-logo">Hangry Herbivore</span>
+        <ul class="footer-links">
+            {footerLinks.map(link => (
+                <li><a href={link.href}>{link.label}</a></li>
+            ))}
+        </ul>
+        <a href="/recipes" class="btn-primary">Browse Recipes</a>
+    </div>
+    <p class="footer-copy">
+        © {new Date().getFullYear()} Hangry Herbivore. Made with 🌱 and a tight grocery budget.
+    </p>
+</footer>
+
+<style>
+    footer {
+        background: var(--text-dark);
+        color: var(--sage-pale);
+        padding: 3rem 2rem;
+    }
+
+    .footer-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .footer-logo {
+        font-family: "Lora", serif;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .footer-links {
+        display: flex;
+        gap: 1.5rem;
+        list-style: none;
+    }
+
+    .footer-links a {
+        font-size: 0.875rem;
+        color: var(--sage-pale);
+        transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--yellow); }
+
+    .btn-primary {
+        background: var(--yellow);
+        color: var(--text-dark);
+        font-weight: 700;
+        font-size: 0.875rem;
+        padding: 0.65rem 1.35rem;
+        border-radius: 100px;
+        transition: background 0.2s;
+    }
+
+    .btn-primary:hover { background: var(--yellow-deep); }
+
+    .footer-copy {
+        max-width: 1100px;
+        margin: 2rem auto 0;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .footer-inner { flex-direction: column; text-align: center; }
+        .footer-links { justify-content: center; flex-wrap: wrap; }
+    }
+</style>
