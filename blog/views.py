@@ -48,7 +48,7 @@ class BlogListAPI(APIView):
                     ],
                     'meta': {
                         'seo_title': post.seo_title or post.title,
-                        'search_description': post.search_description or post.description,
+                        'search_description': post.search_description[:160],
                         'slug': post.slug,
                         'first_published_at': post.first_published_at,
                         'last_published_at': post.last_published_at,
@@ -120,11 +120,11 @@ class BlogDetailAPI(APIView):
                     for r in related
                 ],
                 'meta': {
-                    'seo_title': obj.seo_title or obj.title,
-                    'search_description': obj.search_description or obj.description,
-                    'slug': obj.slug,
-                    'first_published_at': obj.first_published_at,
-                    'last_published_at': obj.last_published_at,
+                    'seo_title': post.seo_title or post.title,
+                    'search_description': post.search_description[:160],
+                    'slug': post.slug,
+                    'first_published_at': post.first_published_at,
+                    'last_published_at': post.last_published_at,
                 }
             }
 
