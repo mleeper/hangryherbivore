@@ -5,7 +5,7 @@ import { getPageData } from '../lib/api.js';
 import "../styles/homepage.css"
 
 const homepage = await getPageData('home');
-
+const { results = [] } = homepage;
 const {
     hero_title,
     hero_subtitle,
@@ -25,7 +25,7 @@ const {
     categories,
     featured_recipes,
     meta,
-} = homepage[0];
+} = results[0];
 ---
 
 <Layout

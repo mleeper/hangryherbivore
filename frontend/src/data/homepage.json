@@ -1,150 +1,147 @@
-[
-  {
-    "hero_title": "Affordable Vegan Meals That Actually Fill You Up",
-    "hero_image": null,
-    "hero_subtitle": "Practical homemade recipes built around real grocery store ingredients — not specialty store splurges.",
-    "meta": {
-        "type": "home.HomePage",
-        "detail_url": "http://hangryherbivore.com/api/pages/3/",
-        "html_url": "http://hangryherbivore.com/",
-        "slug": "home",
-        "show_in_menus": false,
-        "seo_title": "",
+{
+  "count": 1,
+  "results": [
+    {
+      "hero_title": "Affordable Vegan Meals That Actually Fill You Up",
+      "hero_image": null,
+      "hero_subtitle": "Practical homemade recipes built around real grocery store ingredients — not specialty store splurges.",
+      "hero_cta": [
+        {
+          "text": "Browse Recipes",
+          "link": null
+        },
+        {
+          "text": "Get a $40 Meal Plan",
+          "link": null
+        }
+      ],
+      "value_bar": [
+        {
+          "icon": "💸",
+          "text": "Under $2 per serving"
+        },
+        {
+          "icon": "⏱",
+          "text": "30-minute meals"
+        },
+        {
+          "icon": "🥦",
+          "text": "High-protein options"
+        },
+        {
+          "icon": "🧾",
+          "text": "Real grocery pricing"
+        },
+        {
+          "icon": "♻️",
+          "text": "Minimal food waste"
+        }
+      ],
+      "categories": [
+        {
+          "name": "Breakfast",
+          "icon": "🥞",
+          "description": "Best way to start your day"
+        },
+        {
+          "name": "Lunch",
+          "icon": "🥪",
+          "description": "Keep that engine running with quality fuel"
+        },
+        {
+          "name": "Dinner",
+          "icon": "🍛",
+          "description": "Simple and Satisfying"
+        },
+        {
+          "name": "Dessert",
+          "icon": "🧁",
+          "description": "The sweet sweetness"
+        },
+        {
+          "name": "Dutch Oven Meals",
+          "icon": "🍲",
+          "description": "One pot goodness"
+        },
+        {
+          "name": "Under $2 a serving",
+          "icon": "💰",
+          "description": "Let's keep your stomach and wallet full"
+        },
+        {
+          "name": "5 ingredients or less",
+          "icon": "🖐",
+          "description": "We love simple elegance"
+        },
+        {
+          "name": "Meal Prep",
+          "icon": "📦",
+          "description": "Cook Once, eat all week"
+        },
+        {
+          "name": "Sauces & Spreads",
+          "icon": "🥑",
+          "description": "One of these will make your meal a success"
+        },
+        {
+          "name": "Snacks & Sides",
+          "icon": "🍿",
+          "description": "Make meals complete"
+        }
+      ],
+      "how_it_works_title": "How I Keep Vegan Meals Affordable",
+      "how_it_works_text": "Eating plant-based shouldn't mean buying specialty ingredients every week. Everything here is built around five simple principles that keep the grocery bill low and the meals genuinely satisfying.",
+      "how_it_works_list": [
+        {
+          "icon": "🌾",
+          "title": "Staple-first cooking",
+          "text": "Rice, beans, lentils, and pasta form the backbone of every meal."
+        },
+        {
+          "icon": "🚫",
+          "title": "No overpriced substitutes",
+          "text": "Real whole foods, not $8 vegan cheese or fake meat."
+        },
+        {
+          "icon": "📋",
+          "title": "Planned leftovers",
+          "text": "Every recipe is designed with the next day's lunch in mind."
+        },
+        {
+          "icon": "🧂",
+          "title": "Simple seasoning strategy",
+          "text": "Build a small spice kit once, use it in everything."
+        },
+        {
+          "icon": "♻️",
+          "title": "Minimal food waste",
+          "text": "Recipes cross-reference ingredients so nothing goes to waste."
+        }
+      ],
+      "how_it_works_cta": [
+        {
+          "text": "Read the full story",
+          "link": null
+        }
+      ],
+      "about_title": "We are Hangry",
+      "about_content": "\u003Cp data-block-key=\"po50d\"\u003EI'm a developer who got tired of overpriced \"healthy\" recipes and complicated food blogs that assume you have a Whole Foods around the corner.\u003C/p\u003E\u003Cp data-block-key=\"2o3bi\"\u003EHangry Herbivore is where I share simple, budget-focused vegan meals that actually work in real life — no specialty ingredients, no hour-long prep, no guilt about the grocery bill.\u003C/p\u003E",
+      "about_cta": [
+        {
+          "text": "More about us",
+          "link": null
+        }
+      ],
+      "email_signup_title": "Stop Asking \"What's for Dinner?\"",
+      "email_signup_button_text": "Send me the plan",
+      "email_signup_content": "\u003Cp data-block-key=\"32d0m\"\u003EGet 7 days of vegan meals under $40 — complete with grocery list and per-serving cost breakdown.\u003C/p\u003E",
+      "meta": {
+        "seo_title": "Hangry Herbivore - Practical Vegan Food on a Budget",
         "search_description": "",
+        "slug": "home",
         "first_published_at": "2026-02-12T06:49:17.618000Z",
-        "alias_of": null,
-        "locale": "en"
-    },
-    "pageTitle": "Hangry Herbivore - Practical Vegan Food on a Budget",
-    "hero_cta": [
-      {
-        "text": "Browse Recipes",
-        "link": null
-      },
-      {
-        "text": "Get a $40 Meal Plan",
-        "link": null
+        "last_published_at": "2026-09-20T05:45:44.300180Z"
       }
-    ],
-    "value_bar": [
-      {
-        "icon": "💸",
-        "text": "Under $2 per serving"
-      },
-      {
-        "icon": "⏱",
-        "text": "30-minute meals"
-      },
-      {
-        "icon": "🥦",
-        "text": "High-protein options"
-      },
-      {
-        "icon": "🧾",
-        "text": "Real grocery pricing"
-      },
-      {
-        "icon": "♻️",
-        "text": "Minimal food waste"
-      }
-    ],
-    "categories": [
-      {
-        "name": "Breakfast",
-        "icon": "🥞",
-        "description": "Best way to start your day"
-      },
-      {
-        "name": "Lunch",
-        "icon": "🥪",
-        "description": "Keep that engine running with quality fuel"
-      },
-      {
-        "name": "Dinner",
-        "icon": "🍛",
-        "description": "Simple and Satisfying"
-      },
-      {
-        "name": "Dessert",
-        "icon": "🧁",
-        "description": "The sweet sweetness"
-      },
-      {
-        "name": "Dutch Oven Meals",
-        "icon": "🍲",
-        "description": "One pot goodness"
-      },
-      {
-        "name": "Under $2 a serving",
-        "icon": "💰",
-        "description": "Let's keep your stomach and wallet full"
-      },
-      {
-        "name": "5 ingredients or less",
-        "icon": "🖐",
-        "description": "We love simple elegance"
-      },
-      {
-        "name": "Meal Prep",
-        "icon": "📦",
-        "description": "Cook Once, eat all week"
-      },
-      {
-        "name": "Sauces & Spreads",
-        "icon": "🥑",
-        "description": "One of these will make your meal a success"
-      },
-      {
-        "name": "Snacks & Sides",
-        "icon": "🍿",
-        "description": "Make meals complete"
-      }
-    ],
-    "how_it_works_title": "How I Keep Vegan Meals Affordable",
-    "how_it_works_text": "Eating plant-based shouldn't mean buying specialty ingredients every week. Everything here is built around five simple principles that keep the grocery bill low and the meals genuinely satisfying.",
-    "how_it_works_list": [
-      {
-        "icon": "🌾",
-        "title": "Staple-first cooking",
-        "text": "Rice, beans, lentils, and pasta form the backbone of every meal."
-      },
-      {
-        "icon": "🚫",
-        "title": "No overpriced substitutes",
-        "text": "Real whole foods, not $8 vegan cheese or fake meat."
-      },
-      {
-        "icon": "📋",
-        "title": "Planned leftovers",
-        "text": "Every recipe is designed with the next day's lunch in mind."
-      },
-      {
-        "icon": "🧂",
-        "title": "Simple seasoning strategy",
-        "text": "Build a small spice kit once, use it in everything."
-      },
-      {
-        "icon": "♻️",
-        "title": "Minimal food waste",
-        "text": "Recipes cross-reference ingredients so nothing goes to waste."
-      }
-    ],
-    "how_it_works_cta": [
-      {
-        "text": "Read the full story",
-        "link": null
-      }
-    ],
-    "about_title": "We are Hangry",
-    "about_content": "\u003Cp data-block-key=\"po50d\"\u003EI'm a developer who got tired of overpriced \"healthy\" recipes and complicated food blogs that assume you have a Whole Foods around the corner.\u003C/p\u003E\u003Cp data-block-key=\"2o3bi\"\u003EHangry Herbivore is where I share simple, budget-focused vegan meals that actually work in real life — no specialty ingredients, no hour-long prep, no guilt about the grocery bill.\u003C/p\u003E",
-    "about_cta": [
-      {
-        "text": "More about us",
-        "link": null
-      }
-    ],
-    "email_signup_title": "Stop Asking \"What's for Dinner?\"",
-    "email_signup_button_text": "Send me the plan",
-    "email_signup_content": "\u003Cp data-block-key=\"32d0m\"\u003EGet 7 days of vegan meals under $40 — complete with grocery list and per-serving cost breakdown.\u003C/p\u003E"
-  }
-]
+    }
+  ]
+}
