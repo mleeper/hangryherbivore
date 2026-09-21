@@ -64,7 +64,7 @@ class HomeSerializer(serializers.ModelSerializer):
     def get_meta(self, obj):
         return {
             'seo_title': obj.seo_title or obj.title,
-            'search_description': obj.search_description or obj.description,
+            'search_description': obj.search_description,
             'slug': obj.slug,
             'first_published_at': obj.first_published_at,
             'last_published_at': obj.last_published_at,
