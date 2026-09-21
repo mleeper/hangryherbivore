@@ -50,9 +50,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         return obj.get_schema_categories()
 
     def get_meta(self, obj):
+        description = obj.search_description or obj.description or ''
         return {
             'seo_title': obj.seo_title or obj.title,
-            'search_description': obj.search_description or obj.description,
+            'search_description': description[:160],  # trim for meta tag
             'slug': obj.slug,
             'first_published_at': obj.first_published_at,
             'last_published_at': obj.last_published_at,
