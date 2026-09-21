@@ -1,0 +1,359 @@
+---
+import Layout from '../layouts/Layout.astro';
+import RecipeCard from '../components/RecipeCard.astro';
+import { getPageData } from '../lib/api.js';
+
+const recipes = await getPageData('recipes');
+const recipeList = recipes.results ?? [];
+
+// Build category list from recipes
+const categories = [...new Set(
+    recipeList
+        .flatMap(r => r.category)
+        .filter(Boolean)
+        .map(c => JSON.stringify(c))
+)].map(c => JSON.parse(c));
+---
+
+<Layout title="All Recipes" showLeadMagnet={false} description="Find your next meal idea here">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="page-header-inner">
+            <div class="recipe-count-pill">
+                🌱 {recipeList.length} free recipes
+            </div>
+            <h1>All Recipes</h1>
+            <p>Budget-friendly, plant-based meals that actually fill you up.</p>
+        </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar" id="filter-bar">
+        <div class="filter-bar-inner">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input
+                    type="text"
+                    id="search-input"
+                    placeholder="Search recipes..."
+                    autocomplete="off"
+                />
+            </div>
+
+            <select id="cost-filter" class="filter-select">
+                <option value="all">💸 Any cost</option>
+                <option value="under1">Under $1/serving</option>
+                <option value="under2">Under $2/serving</option>
+                <option value="under3">Under $3/serving</option>
+            </select>
+
+            <select id="sort-filter" class="filter-select">
+                <option value="newest">Newest first</option>
+                <option value="cheapest">Cheapest first</option>
+                <option value="quickest">Quickest first</option>
+            </select>
+
+            <div class="filter-meta">
+                <span id="result-count">{recipeList.length} recipes</span>
+                <button id="clear-btn" class="clear-btn">✕ Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECIPE GRID -->
+    <div class="grid-section">
+        <div class="recipe-grid" id="recipe-grid">
+            {recipeList.map(recipe => (
+                <div
+                    class="recipe-card-wrap"
+                    data-title={recipe.title.toLowerCase()}
+                    data-desc={(recipe.description ?? '').toLowerCase()}
+                    data-cost={recipe.cost_per_serving ?? ''}
+                    data-time={recipe.total_time ?? ''}
+                    data-date={recipe.first_published_at}
+                >
+                    <RecipeCard recipe={recipe} />
+                </div>
+            ))}
+
+            <div class="empty-state" id="empty-state">
+                <span class="empty-emoji">🥦</span>
+                <h3>No recipes found</h3>
+                <p>Try adjusting your search or filters.</p>
+            </div>
+        </div>
+    </div>
+
+</Layout>
+
+<!-- Client side filtering -->
+<script>
+    const searchInput = document.getElementById('search-input');
+    const costFilter = document.getElementById('cost-filter');
+    const sortFilter = document.getElementById('sort-filter');
+    const resultCount = document.getElementById('result-count');
+    const clearBtn = document.getElementById('clear-btn');
+    const emptyState = document.getElementById('empty-state');
+    const grid = document.getElementById('recipe-grid');
+    const cards = Array.from(document.querySelectorAll('.recipe-card-wrap'));
+
+    function applyFilters() {
+        const query = searchInput.value.toLowerCase().trim();
+        const cost = costFilter.value;
+        const sort = sortFilter.value;
+        const hasFilters = query || cost !== 'all';
+
+        clearBtn.style.display = hasFilters ? 'inline' : 'none';
+
+        let visible = cards.filter(card => {
+            const title = card.dataset.title;
+            const desc = card.dataset.desc;
+            const cardCost = parseFloat(card.dataset.cost);
+
+            const matchesSearch = !query ||
+                title.includes(query) ||
+                desc.includes(query);
+
+            const matchesCost =
+                cost === 'all' ? true :
+                isNaN(cardCost) ? false :
+                cost === 'under1' ? cardCost < 1 :
+                cost === 'under2' ? cardCost < 2 :
+                cost === 'under3' ? cardCost < 3 : true;
+
+            return matchesSearch && matchesCost;
+        });
+
+        // Sort
+        if (sort === 'cheapest') {
+            visible.sort((a, b) => {
+                const ca = parseFloat(a.dataset.cost) || 999;
+                const cb = parseFloat(b.dataset.cost) || 999;
+                return ca - cb;
+            });
+        } else if (sort === 'quickest') {
+            visible.sort((a, b) =>
+                parseInt(a.dataset.time || 999) - parseInt(b.dataset.time || 999)
+            );
+        } else {
+            visible.sort((a, b) =>
+                new Date(b.dataset.date) - new Date(a.dataset.date)
+            );
+        }
+
+        // Hide all
+        cards.forEach(c => c.style.display = 'none');
+
+        // Show visible in sorted order
+        visible.forEach(card => {
+            card.style.display = 'block';
+            grid.appendChild(card);
+        });
+
+        // Keep empty state at end
+        grid.appendChild(emptyState);
+
+        resultCount.textContent = `${visible.length} recipe${visible.length !== 1 ? 's' : ''}`;
+        emptyState.style.display = visible.length === 0 ? 'block' : 'none';
+    }
+
+    function clearFilters() {
+        searchInput.value = '';
+        costFilter.value = 'all';
+        applyFilters();
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+    costFilter.addEventListener('change', applyFilters);
+    sortFilter.addEventListener('change', applyFilters);
+    clearBtn.addEventListener('click', clearFilters);
+
+    // Init
+    applyFilters();
+</script>
+
+<style>
+    .page-header {
+        background: var(--sage-dark);
+        padding: 3.5rem 2rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -80px; right: -80px;
+        width: 320px; height: 320px;
+        background: var(--yellow);
+        border-radius: 50%;
+        opacity: 0.07;
+    }
+
+    .page-header-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header-inner h1 {
+        color: #fff;
+        font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header-inner p {
+        color: var(--sage-pale);
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    .recipe-count-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: rgba(240,196,25,0.18);
+        color: var(--yellow);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        padding: 0.35rem 0.85rem;
+        border-radius: 100px;
+        margin-bottom: 1rem;
+    }
+
+    .filter-bar {
+        background: #fff;
+        border-bottom: 1.5px solid var(--sage-pale);
+        padding: 0 2rem;
+        position: sticky;
+        top: 64px;
+        z-index: 90;
+    }
+
+    .filter-bar-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        flex-wrap: wrap;
+    }
+
+    .search-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 180px;
+        max-width: 320px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 0.85rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.85rem;
+        pointer-events: none;
+    }
+
+    .search-wrap input {
+        width: 100%;
+        background: var(--sage-wash);
+        border: 1.5px solid var(--sage-pale);
+        border-radius: 100px;
+        padding: 0.55rem 1rem 0.55rem 2.25rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.875rem;
+        color: var(--text-dark);
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .search-wrap input:focus { border-color: var(--sage-light); }
+
+    .filter-select {
+        background: var(--sage-wash);
+        border: 1.5px solid var(--sage-pale);
+        border-radius: 100px;
+        padding: 0.55rem 2rem 0.55rem 1rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.875rem;
+        color: var(--text-dark);
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a9e60' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+    }
+
+    .filter-meta {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    #result-count {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+    }
+
+    .clear-btn {
+        display: none;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--sage-mid);
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: "DM Sans", sans-serif;
+        padding: 0;
+    }
+
+    .clear-btn:hover { color: var(--sage-dark); }
+
+    .grid-section {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2.5rem 2rem 5rem;
+    }
+
+    .recipe-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .empty-state {
+        display: none;
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-emoji {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+    .empty-state p { color: var(--text-muted); font-size: 0.9rem; }
+
+    @media (max-width: 900px) {
+        .recipe-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+        .recipe-grid { grid-template-columns: 1fr; }
+        .search-wrap { max-width: 100%; }
+        .filter-bar { padding: 0 1.25rem; }
+        .grid-section { padding: 2rem 1.25rem 4rem; }
+        .filter-meta { margin-left: 0; }
+    }
+</style>
