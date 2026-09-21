@@ -1,7 +1,7 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import RecipeCard from '../components/RecipeCard.astro';
-import { getPageData } from '../lib/api.js';
+import Layout from '../../layouts/Layout.astro';
+import RecipeCard from '../../components/RecipeCard.astro';
+import { getPageData } from '../../lib/api.js';
 
 const recipes = await getPageData('recipes');
 const recipeList = recipes.results ?? [];

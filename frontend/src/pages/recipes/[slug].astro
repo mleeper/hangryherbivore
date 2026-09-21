@@ -1,0 +1,766 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getPageData } from '../../lib/api.js';
+
+export async function getStaticPaths() {
+    const { results } = await getPageData('recipes');
+    return results.map(recipe => ({
+        params: { slug: recipe.slug },
+        props: { recipe }
+    }));
+}
+
+const { recipe } = Astro.props;
+
+const {
+    title,
+    slug,
+    description,
+    prep_time,
+    cook_time,
+    total_time,
+    servings,
+    cost_per_serving,
+    category,
+    difficulty,
+    ingredients,
+    instructions,
+    image,
+    first_published_at,
+    meta,
+} = recipe;
+
+// Format description — handle \r\n line breaks
+const descriptionParagraphs = description
+    ? description.split(/\r\n|\n/).filter(p => p.trim())
+    : [];
+
+// Format date
+const publishedDate = new Date(first_published_at).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+});
+
+const hasIngredients = ingredients && ingredients.length > 0;
+const hasCategories = category && category.length > 0;
+---
+
+<Layout
+    title={meta.seo_title}
+    description={meta.search_description}
+    heroImage={image?.url}
+    showLeadMagnet={false}
+>
+
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb-wrap">
+        <div class="breadcrumb">
+            <a href="/">Home</a>
+            <span class="sep">›</span>
+            <a href="/recipes">Recipes</a>
+            {hasCategories && (
+                <>
+                    <span class="sep">›</span>
+                    <a href={`/recipes?category=${category[0].slug}`}>
+                        {category[0].name}
+                    </a>
+                </>
+            )}
+            <span class="sep">›</span>
+            <span>{title}</span>
+        </div>
+    </div>
+
+    <!-- RECIPE HEADER -->
+    <div class="recipe-header">
+
+        <div class="recipe-header-left">
+
+            <!-- Tags -->
+            <div class="recipe-tags">
+                {hasCategories && category.map(cat => (
+                    <span class="recipe-tag">{cat.icon} {cat.name}</span>
+                ))}
+                {difficulty && (
+                    <span class="recipe-tag">{difficulty}</span>
+                )}
+                {cost_per_serving && parseFloat(cost_per_serving) < 2 && (
+                    <span class="recipe-tag yellow">Budget Pick</span>
+                )}
+            </div>
+
+            <h1>{title}</h1>
+
+            <!-- Published date -->
+            <p class="published-date">Published {publishedDate}</p>
+
+            <!-- Stats -->
+            <div class="stat-bar">
+                {prep_time && (
+                    <div class="stat">
+                        <div class="stat-icon">🥄</div>
+                        <span class="stat-value">{prep_time}m</span>
+                        <span class="stat-label">Prep</span>
+                    </div>
+                )}
+                {cook_time && (
+                    <div class="stat">
+                        <div class="stat-icon">🔥</div>
+                        <span class="stat-value">{cook_time}m</span>
+                        <span class="stat-label">Cook</span>
+                    </div>
+                )}
+                {total_time && (
+                    <div class="stat">
+                        <div class="stat-icon">⏱</div>
+                        <span class="stat-value">{total_time}m</span>
+                        <span class="stat-label">Total</span>
+                    </div>
+                )}
+                {servings && (
+                    <div class="stat">
+                        <div class="stat-icon">🍽</div>
+                        <span class="stat-value">{servings}</span>
+                        <span class="stat-label">Servings</span>
+                    </div>
+                )}
+                {cost_per_serving && (
+                    <div class="stat">
+                        <div class="stat-icon">💸</div>
+                        <span class="stat-value">${cost_per_serving}</span>
+                        <span class="stat-label">Per serving</span>
+                    </div>
+                )}
+            </div>
+
+            <!-- Action buttons -->
+            <div class="action-row">
+                <button class="btn-primary" onclick="window.print()">
+                    🖨 Print
+                </button>
+                <button
+                    class="btn-outline"
+                    id="share-btn"
+                    onclick="handleShare()"
+                >
+                    🔗 Share
+                </button>
+                <a href="#recipe-body" class="btn-outline">
+                    ↓ Jump to Recipe
+                </a>
+            </div>
+        </div>
+
+        <!-- Hero image -->
+        <div class="recipe-hero-img">
+            {image ? (
+                <img src={image.url} alt={title} />
+            ) : (
+                <div class="img-placeholder">
+                    <span>📷</span>
+                    <p>Photo coming soon</p>
+                </div>
+            )}
+        </div>
+
+    </div>
+
+    <!-- DESCRIPTION -->
+    {descriptionParagraphs.length > 0 && (
+        <div class="description-section">
+            <div class="description-inner">
+                {descriptionParagraphs.map(para => (
+                    <p>{para}</p>
+                ))}
+            </div>
+        </div>
+    )}
+
+    <!-- RECIPE BODY -->
+    <div class="recipe-body" id="recipe-body">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <!-- Ingredients -->
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h3>Ingredients</h3>
+                    {servings && (
+                        <div class="servings-control">
+                            <button id="servings-down">−</button>
+                            <span id="servings-count">{servings}</span>
+                            <button id="servings-up">+</button>
+                        </div>
+                    )}
+                </div>
+
+                {hasIngredients ? (
+                    <ul class="ingredients-list" id="ingredients-list">
+                        {ingredients.map(ing => (
+                            <li>
+                                <span class="ing-name">{ing.name}</span>
+                                <span
+                                    class="ing-amount"
+                                    data-base={ing.quantity}
+                                    data-unit={ing.unit_code}
+                                >
+                                    {ing.quantity}{ing.unit_code} {ing.note && `(${ing.note})`}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <div class="empty-ingredients">
+                        <p>Ingredients coming soon</p>
+                    </div>
+                )}
+            </div>
+
+            <!-- Cost breakdown -->
+            {cost_per_serving && (
+                <div class="sidebar-card">
+                    <div class="sidebar-card-header">
+                        <h3>Cost</h3>
+                    </div>
+                    <div class="cost-card-body">
+                        <div class="cost-total">
+                            <span>Per serving</span>
+                            <span>${cost_per_serving}</span>
+                        </div>
+                        {servings && (
+                            <div class="cost-row">
+                                <span>Total ({servings} servings)</span>
+                                <span>
+                                    ${(parseFloat(cost_per_serving) * servings).toFixed(2)}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+        </aside>
+
+        <!-- INSTRUCTIONS -->
+        <div class="steps-area">
+            <h2>Instructions</h2>
+
+            {instructions && instructions.length > 0 ? (
+                instructions.map((step, i) => (
+                    <div class="step" id={`step-${i + 1}`}>
+                        <div
+                            class="step-checkbox"
+                            data-step={i + 1}
+                            onclick={`toggleStep(${i + 1})`}
+                        ></div>
+                        <div class="step-num" id={`num-${i + 1}`}>
+                            {i + 1}
+                        </div>
+                        <div class="step-content">
+                            <p>{step.text}</p>
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <p class="coming-soon">Instructions coming soon.</p>
+            )}
+        </div>
+
+    </div>
+
+</Layout>
+
+<script>
+    // Share button
+    function handleShare() {
+        if (navigator.share) {
+            navigator.share({
+                title: document.title,
+                url: window.location.href
+            });
+        } else if (navigator.clipboard) {
+            navigator.clipboard.writeText(window.location.href);
+            const btn = document.getElementById('share-btn');
+            if (btn) {
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = '🔗 Share', 2000);
+            }
+        }
+    }
+
+    // Step completion toggle
+    function toggleStep(n) {
+        const step = document.getElementById(`step-${n}`);
+        const box = step?.querySelector('.step-checkbox');
+        const num = document.getElementById(`num-${n}`);
+        if (!step || !box || !num) return;
+
+        const done = box.classList.toggle('checked');
+        step.classList.toggle('completed', done);
+        num.classList.toggle('done', done);
+    }
+
+    // Servings adjuster
+    const baseServings = parseInt(
+        document.getElementById('servings-count')?.textContent ?? '1'
+    );
+
+    let currentServings = baseServings;
+
+    document.getElementById('servings-up')?.addEventListener('click', () => {
+        currentServings++;
+        updateServings();
+    });
+
+    document.getElementById('servings-down')?.addEventListener('click', () => {
+        if (currentServings > 1) {
+            currentServings--;
+            updateServings();
+        }
+    });
+
+    function updateServings() {
+        const countEl = document.getElementById('servings-count');
+        if (countEl) countEl.textContent = currentServings;
+
+        document.querySelectorAll('.ing-amount[data-base]').forEach(el => {
+            const base = parseFloat(el.dataset.base);
+            const scaled = (base / baseServings) * currentServings;
+            const rounded = Math.round(scaled * 4) / 4;
+            el.textContent = `${rounded % 1 === 0 ? rounded : rounded.toFixed(1)}${el.dataset.unit}`;
+        });
+    }
+</script>
+
+<style>
+    /* Breadcrumb */
+    .breadcrumb-wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1.25rem 2rem 0;
+    }
+
+    .breadcrumb {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb a {
+        color: var(--text-muted);
+        transition: color 0.2s;
+    }
+
+    .breadcrumb a:hover { color: var(--sage-dark); }
+    .breadcrumb .sep { opacity: 0.4; }
+
+    /* Recipe header */
+    .recipe-header {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2rem 2rem 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3.5rem;
+        align-items: start;
+    }
+
+    .recipe-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .recipe-tag {
+        background: var(--sage-pale);
+        color: var(--sage-dark);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.3rem 0.75rem;
+        border-radius: 100px;
+    }
+
+    .recipe-tag.yellow {
+        background: var(--yellow);
+        color: var(--text-dark);
+    }
+
+    .recipe-header h1 {
+        font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+        margin-bottom: 0.5rem;
+    }
+
+    .published-date {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Stats */
+    .stat-bar {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.75rem;
+    }
+
+    .stat {
+        background: #fff;
+        border: 1.5px solid var(--sage-pale);
+        border-radius: 14px;
+        padding: 0.85rem 0.75rem;
+        text-align: center;
+        min-width: 70px;
+    }
+
+    .stat-icon { font-size: 1.1rem; margin-bottom: 0.25rem; }
+
+    .stat-value {
+        font-family: "Lora", serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--sage-dark);
+        display: block;
+        line-height: 1.1;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-top: 0.2rem;
+        display: block;
+    }
+
+    /* Action buttons */
+    .action-row {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary {
+        background: var(--yellow);
+        color: var(--text-dark);
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 100px;
+        transition: background 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        border: none;
+        cursor: pointer;
+        font-family: "DM Sans", sans-serif;
+    }
+
+    .btn-primary:hover { background: var(--yellow-deep); }
+
+    .btn-outline {
+        border: 1.5px solid var(--sage-pale);
+        color: var(--sage-dark);
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 100px;
+        transition: background 0.2s, border-color 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: transparent;
+        cursor: pointer;
+        font-family: "DM Sans", sans-serif;
+    }
+
+    .btn-outline:hover {
+        background: var(--sage-wash);
+        border-color: var(--sage-light);
+    }
+
+    /* Hero image */
+    .recipe-hero-img {
+        width: 100%;
+        aspect-ratio: 4/3;
+        border-radius: 24px;
+        overflow: hidden;
+        background: var(--sage-pale);
+    }
+
+    .recipe-hero-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .img-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+    }
+
+    .img-placeholder span { font-size: 2rem; }
+    .img-placeholder p { font-size: 0.8rem; }
+
+    /* Description */
+    .description-section {
+        background: var(--sage-wash);
+        margin-top: 2rem;
+        padding: 2.5rem 2rem;
+        border-top: 1.5px solid var(--sage-pale);
+        border-bottom: 1.5px solid var(--sage-pale);
+    }
+
+    .description-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .description-inner p {
+        font-size: 0.9375rem;
+        color: var(--text-mid);
+        line-height: 1.75;
+        max-width: 720px;
+    }
+
+    /* Recipe body */
+    .recipe-body {
+        max-width: 1100px;
+        margin: 2.5rem auto 0;
+        padding: 0 2rem 4rem;
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 3rem;
+        align-items: start;
+    }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top: 80px; }
+
+    .sidebar-card {
+        background: #fff;
+        border: 1.5px solid var(--sage-pale);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+    }
+
+    .sidebar-card-header {
+        background: var(--sage-dark);
+        padding: 0.85rem 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .sidebar-card-header h3 {
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: var(--sage-pale);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin: 0;
+    }
+
+    .servings-control {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .servings-control button {
+        width: 24px;
+        height: 24px;
+        background: rgba(255,255,255,0.15);
+        border: none;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s;
+        font-family: "DM Sans", sans-serif;
+    }
+
+    .servings-control button:hover {
+        background: rgba(255,255,255,0.25);
+    }
+
+    #servings-count {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--yellow);
+        min-width: 24px;
+        text-align: center;
+    }
+
+    .ingredients-list {
+        padding: 1rem 1.25rem;
+        list-style: none;
+    }
+
+    .ingredients-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--sage-wash);
+        font-size: 0.9rem;
+        gap: 0.5rem;
+    }
+
+    .ingredients-list li:last-child { border-bottom: none; }
+    .ing-name { color: var(--text-dark); }
+
+    .ing-amount {
+        color: var(--sage-mid);
+        font-weight: 600;
+        font-size: 0.8125rem;
+        white-space: nowrap;
+    }
+
+    .empty-ingredients {
+        padding: 1.5rem 1.25rem;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    /* Cost card */
+    .cost-card-body { padding: 1rem 1.25rem; }
+
+    .cost-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        padding: 0.35rem 0;
+        color: var(--text-mid);
+    }
+
+    .cost-total {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--sage-dark);
+        padding-bottom: 0.6rem;
+        margin-bottom: 0.4rem;
+        border-bottom: 1.5px solid var(--sage-pale);
+    }
+
+    /* Steps */
+    .steps-area h2 {
+        font-size: 1.375rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .step {
+        display: flex;
+        gap: 1.25rem;
+        margin-bottom: 1.75rem;
+        align-items: flex-start;
+    }
+
+    .step-checkbox {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--sage-pale);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        margin-top: 0.2rem;
+        transition: background 0.15s, border-color 0.15s;
+    }
+
+    .step-checkbox:hover { border-color: var(--sage-light); }
+
+    .step-checkbox.checked {
+        background: var(--sage-mid);
+        border-color: var(--sage-mid);
+    }
+
+    .step-checkbox.checked::after {
+        content: '✓';
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+    .step-num {
+        width: 36px;
+        height: 36px;
+        background: var(--yellow);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Lora", serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-dark);
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    .step-num.done {
+        background: var(--sage-pale);
+        color: var(--sage-mid);
+    }
+
+    .step-content p {
+        color: var(--text-mid);
+        font-size: 0.9375rem;
+        line-height: 1.7;
+    }
+
+    .step.completed .step-content p { opacity: 0.45; }
+
+    .coming-soon {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-style: italic;
+    }
+
+    /* Responsive */
+    @media (max-width: 820px) {
+        .recipe-header {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            padding: 1.5rem 1.25rem 0;
+        }
+
+        .recipe-body {
+            grid-template-columns: 1fr;
+            padding: 0 1.25rem 3rem;
+        }
+
+        .sidebar { position: static; }
+        .breadcrumb-wrap { padding: 1.25rem 1.25rem 0; }
+        .description-section { padding: 2rem 1.25rem; }
+    }
+</style>

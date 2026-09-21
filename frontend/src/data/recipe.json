@@ -1,0 +1,54 @@
+{
+  "title": "Vegan Biscuits",
+  "slug": "vegan-biscuits",
+  "description": "Close your eyes. Imagine something freshly baked, warm from the oven — buttery, fluffy, golden at the edges like your favorite cloud. Now open them, because that's exactly what you're about to make.\r\nJust 5 simple, inexpensive ingredients and a little patience. Let's get into it.\r\nChoosing your flour — you've got options here, and they all behave a little differently. All-purpose gives you that classic smooth, tender crumb. Whole wheat brings more fiber, nutrients, and a heartier flavour, but a slightly denser texture. Almond flour is smooth with a subtle nuttiness, though it's the densest of the three. You can also mix and match — white whole wheat sits right between all-purpose and regular whole wheat and is a great middle ground. For this recipe we use a combination of all-purpose and white whole wheat.\r\nWe love coconut cream here — it gives the biscuits a rich, luscious creaminess. Full-fat coconut milk works as a swap if that's what you have on hand.\r\nOne important note: don't skip preheating, and don't be put off by the high temperature. That heat is what gives these biscuits their rise and golden top. Trust the process.\r\nEat them warm with butter and jam, slathered in your favorite nut butter, or built into a sandwich. However you serve them, we have a feeling they won't last long.",
+  "prep_time": 5,
+  "cook_time": 8,
+  "total_time": 13,
+  "servings": 12,
+  "cost_per_serving": null,
+  "category": [],
+  "difficulty": "easy",
+  "affiliate_product": "",
+  "sponsored": false,
+  "ingredients": [],
+  "instructions": [
+    {
+      "@type": "HowToStep",
+      "text": "Preheat oven to 450 degrees Fahrenheit"
+    },
+    {
+      "@type": "HowToStep",
+      "text": "Combine all ingredients in a large bowl using a wooden spoon."
+    },
+    {
+      "@type": "HowToStep",
+      "text": "Mix until a wet dough is formed."
+    },
+    {
+      "@type": "HowToStep",
+      "text": "Line a baking sheet with parchment paper."
+    },
+    {
+      "@type": "HowToStep",
+      "text": "Use an ice cream scooper to scoop a dough ball and place onto the lined pan."
+    },
+    {
+      "@type": "HowToStep",
+      "text": "Bake for 8-10 minutes."
+    },
+    {
+      "@type": "HowToStep",
+      "text": "Serve with warm butter and jam."
+    }
+  ],
+  "image": null,
+  "first_published_at": "2026-04-12T08:15:26.705000Z",
+  "meta": {
+    "seo_title": "Vegan Biscuits",
+    "search_description": "Close your eyes. Imagine something freshly baked, warm from the oven — buttery, fluffy, golden at the edges like your favorite cloud. Now open them, because tha",
+    "slug": "vegan-biscuits",
+    "first_published_at": "2026-04-12T08:15:26.705000Z",
+    "last_published_at": "2026-05-25T07:59:48.911568Z"
+  }
+}
