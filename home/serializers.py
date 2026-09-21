@@ -10,6 +10,8 @@ class HomeSerializer(serializers.ModelSerializer):
     how_it_works_cta = serializers.SerializerMethodField()
     about_cta = serializers.SerializerMethodField()
     categories = serializers.SerializerMethodField()
+    meta = serializers.SerializerMethodField()
+
 
     class Meta:
         model = HomePage
@@ -30,6 +32,7 @@ class HomeSerializer(serializers.ModelSerializer):
             "email_signup_title",
             "email_signup_button_text",
             "email_signup_content",
+            "meta",
         ]
 
     def get_hero_image(self, obj):
@@ -58,4 +61,11 @@ class HomeSerializer(serializers.ModelSerializer):
     def get_categories(self, obj):
         return obj.get_schema_categories()
 
-
+    def get_meta(self, obj):
+        return {
+            'seo_title': obj.seo_title or obj.title,
+            'search_description': obj.search_description or obj.description,
+            'slug': obj.slug,
+            'first_published_at': obj.first_published_at,
+            'last_published_at': obj.last_published_at,
+        }

@@ -46,6 +46,13 @@ class BlogListAPI(APIView):
                         }
                         for tag in post.tags.all()
                     ],
+                    'meta': {
+                        'seo_title': post.seo_title or post.title,
+                        'search_description': post.search_description or post.description,
+                        'slug': post.slug,
+                        'first_published_at': post.first_published_at,
+                        'last_published_at': post.last_published_at,
+                    },
                 })
 
             return Response({
@@ -111,7 +118,14 @@ class BlogDetailAPI(APIView):
                         ).url if r.hero_image else None,
                     }
                     for r in related
-                ]
+                ],
+                'meta': {
+                    'seo_title': obj.seo_title or obj.title,
+                    'search_description': obj.search_description or obj.description,
+                    'slug': obj.slug,
+                    'first_published_at': obj.first_published_at,
+                    'last_published_at': obj.last_published_at,
+                }
             }
 
             return Response(data)

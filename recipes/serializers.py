@@ -8,6 +8,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     instructions = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
+    meta = serializers.SerializerMethodField()
 
     class Meta:
         model = RecipePage
@@ -28,6 +29,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             "instructions",
             "image",
             "first_published_at",
+            "meta",
         ]
 
 
@@ -46,4 +48,13 @@ class RecipeSerializer(serializers.ModelSerializer):
     
     def get_category(self, obj):
         return obj.get_schema_categories()
+
+    def get_meta(self, obj):
+        return {
+            'seo_title': obj.seo_title or obj.title,
+            'search_description': obj.search_description or obj.description,
+            'slug': obj.slug,
+            'first_published_at': obj.first_published_at,
+            'last_published_at': obj.last_published_at,
+        }
 
