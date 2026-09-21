@@ -1,7 +1,3 @@
-export const appendMetaData = ({data, meta, title}) => ({
-    ...data, meta, title
-});
-
 export async function getDevData(type) {
     const devMap = {
         home:         () => import('../data/homepage.json'),
