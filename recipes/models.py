@@ -157,7 +157,7 @@ class Category(index.Indexed, models.Model):
         return f"{self.name}"
 
 #-------------------------------
-class RecipeCategory(models.Model): 
+class RecipeCategory(models.Model):
     page = ParentalKey(
         "recipes.RecipePage",
         related_name="recipe_category",
@@ -565,7 +565,7 @@ class RecipePage(Page):
                 "@type": "HowToStep",
                 "text": step.instruction
             }
-            for step in self.steps.all()
+            for step in self.steps.order_by('step_number')
         ]
     
     def get_schema_categories(self):

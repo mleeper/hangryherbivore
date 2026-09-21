@@ -50,18 +50,43 @@ class MeasurementConversionAPI(APIView):
 
 class RecipeListAPI(ListAPIView):
     serializer_class = RecipeSerializer
+    pagination_class = None
 
-    def get_queryset(self):	
-        return RecipePage.objects.all().prefetch_related(
-            'recipe_ingredients__ingredient__ingredient_nutrients__nutrient'
-        )	
-        #return RecipePage.objects.all().live().specific()
-        #return RecipePage.objects.live().public()
+    def get_queryset(self):
+        return RecipePage.objects.live().public().order_by(
+            '-first_published_at'
+        ).prefetch_related(
+            'recipe_ingredients',
+            'recipe_ingredients__ingredient',
+            'recipe_ingredients__ingredient__ingredient_nutrients',
+            'recipe_ingredients__ingredient__ingredient_nutrients__nutrient',
+            'steps',
+            'recipe_category',
+        ).select_related(
+            'hero_image',
+        )
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'count': len(serializer.data),
+            'results': serializer.data
+        })
 
 class RecipeDetailAPI(RetrieveAPIView):
     serializer_class = RecipeSerializer
     lookup_field = "slug"
 
     def get_queryset(self):
-        return RecipePage.objects.live().public()
+        return RecipePage.objects.live().public().prefetch_related(
+            'recipe_ingredients',
+            'recipe_ingredients__ingredient',
+            'recipe_ingredients__ingredient__ingredient_nutrients',
+            'recipe_ingredients__ingredient__ingredient_nutrients__nutrient',
+            'steps',
+            'recipe_category',
+        ).select_related(
+            'hero_image',
+        )
 
