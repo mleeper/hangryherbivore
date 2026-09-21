@@ -17,7 +17,11 @@ const {
     description = 'Affordable vegan meals that actually fill you up.',
     heroImage,
     showLeadMagnet = true,
-    leadMagnet,
+    leadMagnet = {
+      title: null,
+      content: null,
+      buttonText: null,
+    },
 } = Astro.props;
 ---
 

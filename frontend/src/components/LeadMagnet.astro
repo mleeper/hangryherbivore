@@ -1,15 +1,21 @@
 ---
+import { getPageData } from '../lib/api.js';
+
 interface Props {
     title?: string;
     content?: string;
     buttonText?: string;
 }
 
-const {
-    title = 'Stop Asking "What\'s for Dinner?"',
-    content = 'Get 7 days of vegan meals under $40 — complete with grocery list and per-serving cost breakdown.',
-    buttonText = 'Send Me the Plan',
-} = Astro.props;
+// Use props if passed, otherwise fetch from homepage
+let { title, content, buttonText } = Astro.props;
+
+if (!title || !content) {
+    const { results: [data] } = await getPageData('home');
+    title = title ?? data.email_signup_title;
+    content = content ?? data.email_signup_content;
+    buttonText = buttonText ?? data.email_signup_button_text;
+}
 ---
 
 <section class="lead-magnet">
