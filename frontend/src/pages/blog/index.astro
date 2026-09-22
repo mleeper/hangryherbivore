@@ -1,0 +1,478 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getPageData } from '../../lib/api.js';
+
+const [blogData, categoriesData] = await Promise.all([
+    getPageData('blogIndex'),
+    getPageData('blogCategories'),
+]);
+
+const posts = blogData.results ?? [];
+const categories = categoriesData.results ?? [];
+const activeCategories = categories.filter(cat => cat.post_count > 0);
+
+const featuredPost = posts[0] ?? null;
+const featuredCats = featuredPost
+    ? featuredPost.categories.map(c => c.slug).join(' ')
+    : '';
+
+const remainingPosts = posts.slice(1).map(post => ({
+    ...post,
+    catSlugs: post.categories.map(c => c.slug).join(' ')
+}));
+
+const formatDate = (dateStr, short = false) =>
+    new Date(dateStr).toLocaleDateString('en-US', short
+        ? { month: 'short', day: 'numeric', year: 'numeric' }
+        : { year: 'numeric', month: 'long', day: 'numeric' }
+    );
+---
+
+<Layout
+    title="Blog"
+    description="Tips, guides, and ideas for eating well on a budget."
+>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="page-header-inner">
+            <div class="blog-count-pill">✍️ {posts.length} posts</div>
+            <h1>The Blog</h1>
+            <p>Budget tips, grocery guides, and plant-based inspiration.</p>
+
+            {activeCategories.length > 0 && (
+                <div class="cat-tabs">
+                    <button class="cat-tab active" data-cat="all">All</button>
+                    {activeCategories.map(cat => (
+                        <button class="cat-tab" data-cat={cat.slug}>
+                            {cat.icon} {cat.name}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    </div>
+
+    <!-- BLOG GRID -->
+    <div class="grid-section">
+
+        {posts.length === 0 && (
+            <div class="no-posts">
+                <span>✍️</span>
+                <h3>Posts coming soon</h3>
+                <p>Check back shortly for tips, guides, and plant-based inspiration.</p>
+            </div>
+        )}
+
+        {featuredPost && (
+            <div class="featured-post" data-cats={featuredCats}>
+                <div class="featured-img-wrap">
+                    {featuredPost.hero_image
+                        ? <img src={featuredPost.hero_image} alt={featuredPost.title} />
+                        : <div class="img-placeholder"></div>
+                    }
+                    <span class="featured-label">Latest Post</span>
+                </div>
+                <div class="featured-body">
+                    <div class="post-cats">
+                        {featuredPost.categories.map(cat => (
+                            <span class="post-cat">{cat.icon} {cat.name}</span>
+                        ))}
+                    </div>
+                    <h2>{featuredPost.title}</h2>
+                    {featuredPost.excerpt && <p class="featured-excerpt">{featuredPost.excerpt}</p>}
+                    <div class="post-meta">
+                        <span class="post-date">{formatDate(featuredPost.first_published_at)}</span>
+                        {featuredPost.tags?.length > 0 && (
+                            <div class="post-tags">
+                                {featuredPost.tags.map(tag => (
+                                    <span class="post-tag">{tag.name}</span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <a href={`/blog/${featuredPost.slug}`} class="read-more">
+                        Read post →
+                    </a>
+                </div>
+            </div>
+        )}
+
+        {remainingPosts.length > 0 && (
+            <div class="posts-grid" id="posts-grid">
+                {remainingPosts.map(post => (
+                    <a href={`/blog/${post.slug}`} class="post-card" data-cats={post.catSlugs}>
+                        <div class="card-img">
+                            {post.hero_image
+                                ? <img src={post.hero_image} alt={post.title} />
+                                : <div class="img-placeholder"></div>
+                            }
+                        </div>
+                        <div class="card-body">
+                            <div class="post-cats">
+                                {post.categories.map(cat => (
+                                    <span class="post-cat">{cat.icon} {cat.name}</span>
+                                ))}
+                            </div>
+                            <h3>{post.title}</h3>
+                            {post.excerpt && <p class="card-excerpt">{post.excerpt}</p>}
+                            <span class="post-date">{formatDate(post.first_published_at, true)}</span>
+                        </div>
+                    </a>
+                ))}
+
+                <div class="empty-state" id="empty-state">
+                    <span>🌿</span>
+                    <h3>No posts in this category yet</h3>
+                </div>
+            </div>
+        )}
+
+    </div>
+
+</Layout>
+
+<script>
+    const tabs = document.querySelectorAll('.cat-tab');
+    const featuredPost = document.querySelector('.featured-post');
+    const postCards = document.querySelectorAll('.post-card');
+    const emptyState = document.getElementById('empty-state');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            filterPosts(tab.dataset.cat);
+        });
+    });
+
+    function filterPosts(activeCat) {
+        if (featuredPost) {
+            const cats = featuredPost.dataset.cats ?? '';
+            featuredPost.style.display =
+                activeCat === 'all' || cats.includes(activeCat) ? 'grid' : 'none';
+        }
+
+        let visibleCount = 0;
+        postCards.forEach(card => {
+            const cats = card.dataset.cats ?? '';
+            const show = activeCat === 'all' || cats.includes(activeCat);
+            card.style.display = show ? 'flex' : 'none';
+            if (show) visibleCount++;
+        });
+
+        if (emptyState) {
+            emptyState.style.display =
+                visibleCount === 0 && activeCat !== 'all' ? 'block' : 'none';
+        }
+    }
+</script>
+
+<style>
+    .page-header {
+        background: var(--sage-dark);
+        padding: 3.5rem 2rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -80px; right: -80px;
+        width: 320px; height: 320px;
+        background: var(--yellow);
+        border-radius: 50%;
+        opacity: 0.07;
+    }
+
+    .page-header-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header-inner h1 {
+        color: #fff;
+        font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header-inner > p {
+        color: var(--sage-pale);
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .blog-count-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: rgba(240,196,25,0.18);
+        color: var(--yellow);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        padding: 0.35rem 0.85rem;
+        border-radius: 100px;
+        margin-bottom: 1rem;
+    }
+
+    .cat-tabs {
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: none;
+        margin-top: 0.5rem;
+    }
+
+    .cat-tabs::-webkit-scrollbar { display: none; }
+
+    .cat-tab {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--sage-pale);
+        white-space: nowrap;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        background: none;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        font-family: "DM Sans", sans-serif;
+        transition: color 0.2s, border-color 0.2s;
+    }
+
+    .cat-tab:hover { color: #fff; }
+    .cat-tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
+
+    .grid-section {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2.5rem 2rem 5rem;
+    }
+
+    .featured-post {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        background: #fff;
+        border: 1.5px solid var(--sage-pale);
+        border-radius: 24px;
+        overflow: hidden;
+        margin-bottom: 2.5rem;
+        transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .featured-post:hover {
+        box-shadow: 0 12px 40px rgba(61,79,28,0.1);
+        border-color: var(--sage-light);
+    }
+
+    .featured-img-wrap {
+        aspect-ratio: 4/3;
+        background: var(--sage-pale);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .featured-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .img-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--sage-pale);
+    }
+
+    .featured-label {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: var(--yellow);
+        color: var(--text-dark);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.3rem 0.75rem;
+        border-radius: 100px;
+    }
+
+    .featured-body {
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .featured-body h2 {
+        font-size: 1.625rem;
+        line-height: 1.25;
+        transition: color 0.2s;
+    }
+
+    .featured-post:hover h2 { color: var(--sage-mid); }
+
+    .featured-excerpt {
+        color: var(--text-mid);
+        font-size: 0.9375rem;
+        line-height: 1.7;
+    }
+
+    .post-cats {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
+
+    .post-cat {
+        background: var(--sage-wash);
+        color: var(--sage-mid);
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.2rem 0.6rem;
+        border-radius: 100px;
+    }
+
+    .post-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .post-date {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .post-tags {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
+
+    .post-tag {
+        background: var(--cream-warm);
+        color: var(--text-muted);
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 100px;
+    }
+
+    .read-more {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--sage-mid);
+        border-bottom: 1.5px solid var(--sage-pale);
+        padding-bottom: 1px;
+        display: inline-block;
+        align-self: flex-start;
+        transition: color 0.2s, border-color 0.2s;
+    }
+
+    .featured-post:hover .read-more {
+        color: var(--sage-dark);
+        border-color: var(--sage-mid);
+    }
+
+    .posts-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .post-card {
+        background: #fff;
+        border: 1.5px solid var(--sage-pale);
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .post-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(61,79,28,0.1);
+        border-color: var(--sage-light);
+    }
+
+    .card-img {
+        aspect-ratio: 16/9;
+        background: var(--sage-pale);
+        overflow: hidden;
+    }
+
+    .card-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .card-body h3 {
+        font-size: 1rem;
+        transition: color 0.2s;
+    }
+
+    .post-card:hover h3 { color: var(--sage-mid); }
+
+    .card-excerpt {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        flex: 1;
+    }
+
+    .empty-state {
+        display: none;
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state span {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 0.75rem;
+    }
+
+    .no-posts {
+        text-align: center;
+        padding: 5rem 2rem;
+        color: var(--text-muted);
+    }
+
+    .no-posts span {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 900px) {
+        .posts-grid { grid-template-columns: repeat(2, 1fr); }
+        .featured-post { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+        .posts-grid { grid-template-columns: 1fr; }
+        .grid-section { padding: 2rem 1.25rem 4rem; }
+        .page-header { padding: 2.5rem 1.25rem 0; }
+    }
+</style>

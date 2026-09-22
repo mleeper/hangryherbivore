@@ -1,0 +1,61 @@
+{
+  "count": 8,
+  "results": [
+    {
+      "name": "Budget Tips",
+      "slug": "budget-tips",
+      "icon": "💸",
+      "description": "Smart ways to stretch your grocery budget further.",
+      "post_count": 0
+    },
+    {
+      "name": "Meal Planning",
+      "slug": "meal-planning",
+      "icon": "📋",
+      "description": "Plan your week, reduce waste, and save time.",
+      "post_count": 0
+    },
+    {
+      "name": "Grocery Guides",
+      "slug": "grocery-guides",
+      "icon": "🛒",
+      "description": "What to buy, where to buy it, and how to store it.",
+      "post_count": 1
+    },
+    {
+      "name": "Kitchen Skills",
+      "slug": "kitchen-skills",
+      "icon": "🔪",
+      "description": "Techniques and tips to make cooking easier and faster.",
+      "post_count": 0
+    },
+    {
+      "name": "Nutrition",
+      "slug": "nutrition",
+      "icon": "🥦",
+      "description": "Understanding nutrients and eating well on a budget.",
+      "post_count": 2
+    },
+    {
+      "name": "Recipe Roundups",
+      "slug": "recipe-roundups",
+      "icon": "📖",
+      "description": "Curated collections of recipes around a theme.",
+      "post_count": 0
+    },
+    {
+      "name": "Ingredient Spotlights",
+      "slug": "ingredient-spotlights",
+      "icon": "🌿",
+      "description": "Deep dives into budget staple ingredients.",
+      "post_count": 0
+    },
+    {
+      "name": "Seasonal Eating",
+      "slug": "seasonal-eating",
+      "icon": "🍂",
+      "description": "Eating with the seasons to save money and eat fresher.",
+      "post_count": 0
+    }
+  ]
+}
