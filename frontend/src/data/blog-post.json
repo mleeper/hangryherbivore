@@ -1,0 +1,53 @@
+{
+  "id": 13,
+  "title": "Flour Power",
+  "slug": "flour-power",
+  "excerpt": "So many flours with different powers.",
+  "content": "\u003Cp data-block-key=\"ubh6u\"\u003EAll purpose flour, whole wheat flour, millet flour. So many flours with different powers. But are they all used for? Let explore together.\u003C/p\u003E\u003Cp data-block-key=\"5minv\"\u003E\u003C/p\u003E\u003Ch2 data-block-key=\"co7i9\"\u003EThe usual suspects\u003C/h2\u003E\u003Ch3 data-block-key=\"4cn2\"\u003EAll purpose flour\u003C/h3\u003E\u003Cp data-block-key=\"ans16\"\u003EWe all know it. Most of us it love it (a little too much). And some of course hate it. All purpose flour has made quite the impact on our lives. It has made baked goods soft, chewy, delicious, and addicting. But let's look into how all purpose flour is made.\u003C/p\u003E",
+  "first_published_at": "2026-09-21T22:27:06.174531Z",
+  "last_published_at": "2026-09-21T22:27:06.174531Z",
+  "hero_image": null,
+  "categories": [
+    {
+      "name": "Grocery Guides",
+      "slug": "grocery-guides",
+      "icon": "🛒",
+      "description": "What to buy, where to buy it, and how to store it."
+    },
+    {
+      "name": "Nutrition",
+      "slug": "nutrition",
+      "icon": "🥦",
+      "description": "Understanding nutrients and eating well on a budget."
+    }
+  ],
+  "tags": [
+    {
+      "name": "baking",
+      "slug": "baking"
+    },
+    {
+      "name": "cooking tips",
+      "slug": "cooking-tips"
+    },
+    {
+      "name": "healthy flour",
+      "slug": "healthy-flour"
+    }
+  ],
+  "related_posts": [
+    {
+      "title": "Protein to the People",
+      "slug": "protein-to-the-people",
+      "excerpt": "Plant based eating is not devoid of protein. Eat plants and be strong.",
+      "hero_image": null
+    }
+  ],
+  "meta": {
+    "seo_title": "Flour Power",
+    "search_description": "",
+    "slug": "flour-power",
+    "first_published_at": "2026-09-21T22:27:06.174531Z",
+    "last_published_at": "2026-09-21T22:27:06.174531Z"
+  }
+}

@@ -6,6 +6,7 @@ export async function getDevData(type) {
         blogIndex:    () => import('../data/blog.json'),
         blogPost:     () => import('../data/blog-post.json'),
         measurements: () => import('../data/measurements.json'),
+        blogCategories: () => import('../data/blog-categories.json'),
     }
 
     const loader = devMap[type];
