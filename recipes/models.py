@@ -33,6 +33,25 @@ UNIT_CHOICES = [
     ('clove', 'Clove(s)'),
     ('head', 'Head(s)'),
 ]
+
+INGREDIENT_UNIT_CHOICES = [
+    # Metric
+    ('g',     'Grams (g)'),
+    ('kg',    'Kilograms (kg)'),
+    ('ml',    'Milliliters (ml)'),
+    ('l',     'Liters (L)'),
+
+    # Abstract
+    ('whole', 'Whole'),
+    ('half',  'Half'),
+    ('clove', 'Clove'),
+    ('head',  'Head'),
+    ('stalk', 'Stalk'),
+    ('sprig', 'Sprig'),
+    ('leaf',  'Leaf'),
+    ('slice', 'Slice'),
+    ('piece', 'Piece'),
+]
 CATEGORIES = [
     ('Breakfast', 'Breakfast'),
     ('Lunch', 'Lunch'),
@@ -269,6 +288,13 @@ class RecipeIngredient(models.Model):
         on_delete=models.CASCADE,
         related_name="+"
     )
+    unit = models.CharField( 
+        max_length=20,
+        choices=INGREDIENT_UNIT_CHOICES,
+        blank=True,
+        null=True,
+        help_text="Standardized unit of measurement"
+    )
     quantity = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     note = models.CharField(
         max_length=120,
@@ -279,6 +305,7 @@ class RecipeIngredient(models.Model):
     panels = [
         FieldPanel("ingredient"),
         FieldPanel("quantity"),
+        FieldPanel("unit"),
 	    FieldPanel("note"),
     ]
 
@@ -487,56 +514,59 @@ class RecipePage(Page):
     
     def get_schema_ingredients(self):
         data = []
-    
+
         for i in self.recipe_ingredients.all():
             if not i.ingredient:
                 continue
-            
-            # Safely capture your clean numeric quantity
+
             recipe_qty = float(i.quantity) if i.quantity is not None else 0.0
-            base_serving_size = 100
+            unit_code = i.unit or ''
+
+            # Convert abstract units to grams
+            ABSTRACT_UNITS = {'clove', 'whole', 'half', 'slice', 'head', 'stalk', 'sprig', 'leaf', 'piece', 'can'}
+
+            if unit_code in ABSTRACT_UNITS:
+                converted = abstract_to_grams(unit_code, i.ingredient.name, recipe_qty)
+                if converted is not None:
+                    normalized_qty = converted
+                else:
+                    # No conversion found — skip nutrition for this ingredient
+                    normalized_qty = None
+            else:
+                normalized_qty = recipe_qty
 
             ingredient_data = {
                 "name": i.ingredient.name,
                 "quantity": recipe_qty,
-                "unit": "g",
-                "is_liquid": i.ingredient.is_liquid,
+                "unit": i.get_unit_display() if i.unit else "",
+                "unit_code": unit_code,
                 "note": i.note or "",
                 "nutrients": []
             }
-        
-            nutrients_list = i.ingredient.ingredient_nutrients.values(
-                'nutrient__name', 
-                'amount', 
-                'nutrient__unit',
-            )
-        
-            # Straightforward, bulletproof math scaling
-            scale_factor = recipe_qty / base_serving_size
-        
-            for n in nutrients_list:
-                # serving_size_float = float(n['serving_size']) if n['serving_size'] is not None else 0.0
-                base_amount_float = float(n['amount']) if n['amount'] is not None else 0.0
-                scaled_amount = round(base_amount_float * scale_factor, 2)
-                
-                # # Straightforward, bulletproof math scaling
-                # if serving_size_float > 0 and recipe_qty > 0:
-                #     scale_factor = recipe_qty / serving_size_float
-                #     scaled_amount = round(base_amount_float * scale_factor, 2)
-                # else:
-                #     scale_factor = 1.0
-                #     scaled_amount = base_amount_float
-                
-                ingredient_data["nutrients"].append({
-                    "name": n['nutrient__name'],
-                    "unit": n['nutrient__unit'],
-                    "base_nutrient_amount": base_amount_float,
-                    "scaled_nutrient_amount": scaled_amount,
-                    "scale_factor_applied": round(scale_factor, 2)
-                })
-            
+
+            # Only calculate nutrition if we have a valid quantity
+            if normalized_qty is not None and normalized_qty > 0:
+                nutrients_list = i.ingredient.ingredient_nutrients.values(
+                    'nutrient__name',
+                    'amount',
+                    'nutrient__unit',
+                )
+
+                for n in nutrients_list:
+                    base_amount = float(n['amount']) if n['amount'] is not None else 0.0
+                    scale_factor = normalized_qty / 100
+                    scaled_amount = round(base_amount * scale_factor, 2)
+
+                    ingredient_data["nutrients"].append({
+                        "name": n['nutrient__name'],
+                        "unit": n['nutrient__unit'],
+                        "base_amount": base_amount,
+                        "scaled_amount": scaled_amount,
+                        "scale_factor": round(scale_factor, 2)
+                    })
+
             data.append(ingredient_data)
-        
+
         return data
     
     def get_recipe_total_nutrition(self):
