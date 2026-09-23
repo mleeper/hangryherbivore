@@ -1,9 +1,6 @@
 ---
 import { getPageData } from '../lib/api.js';
 
-const data = await getPageData('measurements');
-const { results } = data;
-
 const CATEGORY_LABELS = {
     flour_powder:   { label: 'Flours & Powders',  icon: '🌾' },
     grains_legumes: { label: 'Grains & Legumes',  icon: '🫘' },
@@ -17,9 +14,12 @@ const CATEGORY_LABELS = {
 const fmt = (n) => n % 1 === 0 ? n.toFixed(0) : n.toString();
 
 interface Props {
+    measurements?: object;
     scrollTable?: boolean;
 }
-const { scrollTable } = Astro.props;
+
+const { scrollTable, measurements = null } = Astro.props;
+const { count, results } = measurements || await getPageData('measurements');
 const tablesSectionCssClass = `tables-section${scrollTable ? ' scrollable' : ''}`;
 const searchSectionCssClass = `search-section${scrollTable ? ' not-sticky' : ''}`;
 const tabsWrapCssClass = `tabs-wrap${scrollTable ? ' not-sticky' : ''}`;
@@ -37,7 +37,7 @@ const tabsWrapCssClass = `tabs-wrap${scrollTable ? ' not-sticky' : ''}`;
                     autocomplete="off"
                 />
             </div>
-            <span class="result-count" id="result-count">{data.count} conversions</span>
+            <span class="result-count" id="result-count">{count} conversions</span>
         </div>
     </div>
 
