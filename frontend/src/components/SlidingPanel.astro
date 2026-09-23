@@ -4,7 +4,7 @@ interface Props {
 }
 const { trigger } = Astro.props;
 ---
-<>
+<div class="sliding-panel-wrapper">
     <button id="trigger" class="sliding-panel-trigger">{trigger}</button>
     <div id="sliding-panel-container" class="sliding-panel-container">
         <div class="button-container">
@@ -13,71 +13,124 @@ const { trigger } = Astro.props;
         <div id="sliding-panel-content">
             <slot />
         </div>
-    <div/>
-</>
+    </div>
+</div>
 
 
 <script>
-    const triggerElement = document.getElementById("trigger");
-    const closeElement = document.getElementById("closebtn");
-    const mainElement = document.getElementById("main");
-    const panelContainerElement = document.getElementById("sliding-panel-container");
+    const triggerElement = document.getElementById('trigger');
+    const closeElement = document.getElementById('closebtn');
+    const mainElement = document.getElementById('main');
+    const panelContainerElement = document.getElementById('sliding-panel-container');
+
+    const isMobile = () => window.innerWidth < 768;
+
     function open() {
-        panelContainerElement.style.width = "50vw";
-        mainElement.style.marginLeft = "50vw";
-        
+        const width = isMobile() ? '100vw' : '50vw';
+        panelContainerElement.style.width = width;
+        if (!isMobile()) mainElement.style.marginLeft = width;
+        document.body.style.overflow = isMobile() ? 'hidden' : '';
     }
 
     function close() {
-        panelContainerElement.style.width = "0";
-        mainElement.style.marginLeft= "0";
+        panelContainerElement.style.width = '0';
+        mainElement.style.marginLeft = '0';
+        document.body.style.overflow = '';
     }
-    triggerElement.addEventListener('click', open);
-    closeElement.addEventListener('click', close);
+
+    triggerElement?.addEventListener('click', open);
+    closeElement?.addEventListener('click', close);
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') close();
+    });
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+        if (
+            panelContainerElement.style.width !== '0' &&
+            panelContainerElement.style.width !== '' &&
+            !panelContainerElement.contains(e.target) &&
+            e.target !== triggerElement
+        ) {
+            close();
+        }
+    });
 </script>
 
 <style>
+    .sliding-panel-wrap {
+        display: inline-block;
+    }
+
+    .sliding-panel-trigger {
+        background: var(--yellow);
+        color: var(--text-dark);
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.875rem;
+        font-weight: 700;
+        padding: 0.65rem 1.25rem;
+        border-radius: 100px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .sliding-panel-trigger:hover {
+        background: var(--yellow-deep);
+    }
+
     .sliding-panel-container {
         height: 100%;
         width: 0;
         position: fixed;
-        z-index: 1;
+        z-index: 200;
         top: 0;
         left: 0;
         overflow-x: hidden;
-        transition: 0.5s;
+        overflow-y: auto;
+        transition: width 0.3s ease;
         padding-top: 60px;
-        border: 1px solid var(--text-mid);
+        background: var(--cream);
+        border-right: 1.5px solid var(--sage-pale);
+        box-shadow: 4px 0 24px rgba(0,0,0,0.08);
     }
 
-    .sliding-panel-container .sliding-panel-trigger {
-        padding: 8px 8px 8px 32px;
-        text-decoration: none;
-        font-size: 25px;
-        color: #818181;
-        display: block;
-        transition: 0.3s;
-    }
-
-    .sliding-panel-container .sliding-panel-trigger:hover {
-        color: #f1f1f1;
-    }
-
-    .sliding-panel-container .button-container {
-        position: relative;
-        height: 50px;
-    }
-
-    .sliding-panel-container .closebtn {
-        position: absolute;
+    .button-container {
+        position: sticky;
         top: 0;
-        right: 25px;
-        font-size: 36px;
-        margin-left: 50px;
+        height: 50px;
+        background: var(--cream);
+        border-bottom: 1.5px solid var(--sage-pale);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0 1.25rem;
+        z-index: 1;
     }
 
-    @media screen and (max-height: 450px) {
-        .sliding-panel-container {padding-top: 15px;}
-        .sliding-panel-container .closebtn {font-size: 18px;}
+    .closebtn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        line-height: 1;
+        padding: 0.25rem;
+        transition: color 0.2s;
+        font-family: "DM Sans", sans-serif;
+    }
+
+    .closebtn:hover { color: var(--sage-dark); }
+
+    #sliding-panel-content {
+        padding: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .sliding-panel-container {
+            width: 0;
+        }
     }
 </style>
