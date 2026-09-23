@@ -1,6 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import SlidingPanel from '../../components/SlidingPanel.astro';
+import Measurements from '../measurements.astro';
 import { getPageData } from '../../lib/api.js';
+import Measurements from '../../components/Measurements.astro';
 
 export async function getStaticPaths() {
     const { results } = await getPageData('recipes');
@@ -195,7 +198,11 @@ const hasCategories = category && category.length > 0;
                         </div>
                     )}
                 </div>
-
+                <div class="measurement-guide">
+                    <SlidingPanel trigger="Measurement Guide">
+                        <Measurements scrollTable={true} />
+                    </SlidingPanel>
+                </div>
                 {hasIngredients ? (
                     <ul class="ingredients-list" id="ingredients-list">
                         {ingredients.map(ing => (
@@ -746,6 +753,9 @@ const hasCategories = category && category.length > 0;
         font-style: italic;
     }
 
+    .measurement-guide {
+        text-align: center;
+    }
     /* Responsive */
     @media (max-width: 820px) {
         .recipe-header {

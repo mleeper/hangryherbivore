@@ -1,0 +1,193 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Measurements from '../components/Measurements.astro';
+---
+
+<Layout
+    title="Measurement Guide"
+    description="Common US to metric measurement conversions for vegan cooking and baking."
+>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="page-header-inner">
+            <div class="pill">📏 Kitchen Reference</div>
+            <h1>Measurement Guide</h1>
+            <p>
+                Common US to metric conversions for the ingredients we use most.
+                All metric weights were measured by scale for accuracy.
+            </p>
+        </div>
+    </div>
+
+    <!-- INTRO STRIP -->
+    <div class="intro-strip">
+        <div class="intro-inner">
+            <div class="intro-item">
+                <span class="intro-icon">⚖️</span>
+                <div>
+                    <strong>Why metric?</strong>
+                    <p>Weight is more accurate than volume — a cup of flour can vary by 20% depending on how it's packed.</p>
+                </div>
+            </div>
+            <div class="intro-item">
+                <span class="intro-icon">🔬</span>
+                <div>
+                    <strong>Scale measured</strong>
+                    <p>Every conversion was weighed on a kitchen scale, not calculated from density tables.</p>
+                </div>
+            </div>
+            <div class="intro-item">
+                <span class="intro-icon">🍳</span>
+                <div>
+                    <strong>Recipe ready</strong>
+                    <p>All values match the ingredient amounts used in our recipes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Measurements Component -->
+    <Measurements/>
+
+    <!-- BOTTOM CTA -->
+    <div class="bottom-cta">
+        <div class="bottom-cta-inner">
+            <h2>Ready to cook?</h2>
+            <p>All our recipes use metric measurements for accuracy.</p>
+            <a href="/recipes" class="btn-primary">Browse Recipes</a>
+        </div>
+    </div>
+
+</Layout>
+
+<style>
+    /* Page header */
+    .page-header {
+        background: var(--sage-dark);
+        padding: 3.5rem 2rem 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -80px; right: -80px;
+        width: 320px; height: 320px;
+        background: var(--yellow);
+        border-radius: 50%;
+        opacity: 0.07;
+    }
+
+    .page-header-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: rgba(240,196,25,0.18);
+        color: var(--yellow);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        padding: 0.35rem 0.85rem;
+        border-radius: 100px;
+        margin-bottom: 1rem;
+    }
+
+    .page-header-inner h1 {
+        color: #fff;
+        font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+        margin-bottom: 0.75rem;
+    }
+
+    .page-header-inner p {
+        color: var(--sage-pale);
+        font-size: 1rem;
+        max-width: 560px;
+        line-height: 1.7;
+    }
+
+    /* Intro strip */
+    .intro-strip {
+        background: var(--sage-wash);
+        border-bottom: 1.5px solid var(--sage-pale);
+        padding: 1.5rem 2rem;
+    }
+
+    .intro-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+    }
+
+    .intro-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .intro-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .intro-item strong {
+        display: block;
+        font-size: 0.875rem;
+        color: var(--sage-dark);
+        margin-bottom: 0.25rem;
+    }
+
+    .intro-item p {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* Bottom CTA */
+    .bottom-cta {
+        background: var(--sage-wash);
+        border-top: 1.5px solid var(--sage-pale);
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .bottom-cta-inner {
+        max-width: 480px;
+        margin: 0 auto;
+    }
+
+    .bottom-cta h2 { font-size: 1.625rem; margin-bottom: 0.5rem; }
+    .bottom-cta p { color: var(--text-mid); margin-bottom: 1.5rem; }
+
+    .btn-primary {
+        background: var(--yellow);
+        color: var(--text-dark);
+        font-weight: 700;
+        font-size: 0.9375rem;
+        padding: 0.85rem 1.75rem;
+        border-radius: 100px;
+        transition: background 0.2s;
+        display: inline-block;
+    }
+
+    .btn-primary:hover { background: var(--yellow-deep); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .intro-inner { grid-template-columns: 1fr; gap: 1rem; }
+        .col-notes { display: none; }
+        .page-header { padding: 2.5rem 1.25rem 2rem; }
+    }
+</style>
