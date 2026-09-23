@@ -24,6 +24,10 @@ body {
     line-height: 1.6;
 }
 
+main {
+    transition: margin-left .5s;
+}
+
 h1, h2, h3, h4 {
     font-family: "Lora", serif;
     color: var(--sage-dark);

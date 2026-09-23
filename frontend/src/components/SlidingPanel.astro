@@ -1,0 +1,83 @@
+---
+interface Props {
+    trigger?: string;
+}
+const { trigger } = Astro.props;
+---
+<>
+    <button id="trigger" class="sliding-panel-trigger">{trigger}</button>
+    <div id="sliding-panel-container" class="sliding-panel-container">
+        <div class="button-container">
+            <button id="closebtn" class="closebtn">&times;</button>
+        </div>
+        <div id="sliding-panel-content">
+            <slot />
+        </div>
+    <div/>
+</>
+
+
+<script>
+    const triggerElement = document.getElementById("trigger");
+    const closeElement = document.getElementById("closebtn");
+    const mainElement = document.getElementById("main");
+    const panelContainerElement = document.getElementById("sliding-panel-container");
+    function open() {
+        panelContainerElement.style.width = "50vw";
+        mainElement.style.marginLeft = "50vw";
+        
+    }
+
+    function close() {
+        panelContainerElement.style.width = "0";
+        mainElement.style.marginLeft= "0";
+    }
+    triggerElement.addEventListener('click', open);
+    closeElement.addEventListener('click', close);
+</script>
+
+<style>
+    .sliding-panel-container {
+        height: 100%;
+        width: 0;
+        position: fixed;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        overflow-x: hidden;
+        transition: 0.5s;
+        padding-top: 60px;
+        border: 1px solid var(--text-mid);
+    }
+
+    .sliding-panel-container .sliding-panel-trigger {
+        padding: 8px 8px 8px 32px;
+        text-decoration: none;
+        font-size: 25px;
+        color: #818181;
+        display: block;
+        transition: 0.3s;
+    }
+
+    .sliding-panel-container .sliding-panel-trigger:hover {
+        color: #f1f1f1;
+    }
+
+    .sliding-panel-container .button-container {
+        position: relative;
+        height: 50px;
+    }
+
+    .sliding-panel-container .closebtn {
+        position: absolute;
+        top: 0;
+        right: 25px;
+        font-size: 36px;
+        margin-left: 50px;
+    }
+
+    @media screen and (max-height: 450px) {
+        .sliding-panel-container {padding-top: 15px;}
+        .sliding-panel-container .closebtn {font-size: 18px;}
+    }
+</style>

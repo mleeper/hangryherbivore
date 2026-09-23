@@ -1,0 +1,464 @@
+---
+import { getPageData } from '../lib/api.js';
+
+const data = await getPageData('measurements');
+const { results } = data;
+
+const CATEGORY_LABELS = {
+    flour_powder:   { label: 'Flours & Powders',  icon: '🌾' },
+    grains_legumes: { label: 'Grains & Legumes',  icon: '🫘' },
+    liquids:        { label: 'Liquids',            icon: '💧' },
+    nuts_seeds:     { label: 'Nuts & Seeds',       icon: '🥜' },
+    spices:         { label: 'Spices',             icon: '🌶️' },
+    sweeteners:     { label: 'Sweeteners',         icon: '🍯' },
+};
+
+// Format quantities — remove trailing .0
+const fmt = (n) => n % 1 === 0 ? n.toFixed(0) : n.toString();
+
+interface Props {
+    scrollTable?: boolean;
+}
+const { scrollTable } = Astro.props;
+const tablesSectionCssClass = `tables-section${scrollTable ? ' scrollable' : ''}`;
+const searchSectionCssClass = `search-section${scrollTable ? ' not-sticky' : ''}`;
+const tabsWrapCssClass = `tabs-wrap${scrollTable ? ' not-sticky' : ''}`;
+---
+<>
+    <!-- SEARCH -->
+    <div class={searchSectionCssClass}>
+        <div class="search-inner">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input
+                    type="text"
+                    id="search-input"
+                    placeholder="Search ingredients..."
+                    autocomplete="off"
+                />
+            </div>
+            <span class="result-count" id="result-count">{data.count} conversions</span>
+        </div>
+    </div>
+
+    <!-- CATEGORY TABS -->
+    <div class={tabsWrapCssClass}>
+        <div class="tabs-inner">
+            <button class="tab active" data-cat="all">All</button>
+            {Object.entries(CATEGORY_LABELS).map(([key, val]) => (
+                results[key]?.length > 0 && (
+                    <button class="tab" data-cat={key}>
+                        {val.icon} {val.label}
+                    </button>
+                )
+            ))}
+        </div>
+    </div>
+
+    <!-- CONVERSION TABLES -->
+    <div class={tablesSectionCssClass}>
+        <div class="tables-inner">
+            {Object.entries(results).map(([categoryKey, items]) => {
+                const cat = CATEGORY_LABELS[categoryKey];
+                return (
+                    <div class="category-block" data-cat={categoryKey} id={categoryKey}>
+                        <div class="category-header">
+                            <span class="category-icon">{cat?.icon}</span>
+                            <h2>{cat?.label ?? categoryKey}</h2>
+                            <span class="category-count">{items.length} items</span>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="col-ingredient">Ingredient</th>
+                                        <th class="col-us">US Amount</th>
+                                        <th class="col-metric">Metric</th>
+                                        <th class="col-notes">Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {items.map(item => (
+                                        <tr
+                                            class="conversion-row"
+                                            data-name={item.ingredient_name.toLowerCase()}
+                                        >
+                                            <td class="col-ingredient">
+                                                <span class="ingredient-name">
+                                                    {item.ingredient_name}
+                                                </span>
+                                            </td>
+                                            <td class="col-us">
+                                                <span class="measurement us">
+                                                    {fmt(item.us_quantity)} {item.us_unit}
+                                                </span>
+                                            </td>
+                                            <td class="col-metric">
+                                                <span class="measurement metric">
+                                                    {fmt(item.metric_quantity)}{item.metric_unit}
+                                                </span>
+                                            </td>
+                                            <td class="col-notes">
+                                                {item.notes
+                                                    ? <span class="note">{item.notes}</span>
+                                                    : <span class="note-empty">—</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                );
+            })}
+
+            <!-- Empty search state -->
+            <div class="empty-state" id="empty-state">
+                <span>🔍</span>
+                <h3>No results found</h3>
+                <p>Try a different search term.</p>
+            </div>
+        </div>
+    </div>
+</>
+
+<script>
+    const searchInput = document.getElementById('search-input');
+    const resultCount = document.getElementById('result-count');
+    const emptyState = document.getElementById('empty-state');
+    const categoryBlocks = document.querySelectorAll('.category-block');
+    const rows = document.querySelectorAll('.conversion-row');
+    const tabs = document.querySelectorAll('.tab');
+
+    let activeCat = 'all';
+    let searchQuery = '';
+
+    // Tab filtering
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            activeCat = tab.dataset.cat;
+
+            // Scroll to category
+            if (activeCat !== 'all') {
+                const block = document.getElementById(activeCat);
+                if (block) {
+                    block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            applyFilters();
+        });
+    });
+
+    // Search
+    searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        applyFilters();
+    });
+
+    function applyFilters() {
+        let visibleTotal = 0;
+
+        categoryBlocks.forEach(block => {
+            const cat = block.dataset.cat;
+            const catMatch = activeCat === 'all' || activeCat === cat;
+
+            if (!catMatch) {
+                block.style.display = 'none';
+                return;
+            }
+
+            // Filter rows within this block
+            const blockRows = block.querySelectorAll('.conversion-row');
+            let blockVisible = 0;
+
+            blockRows.forEach(row => {
+                const name = row.dataset.name ?? '';
+                const show = !searchQuery || name.includes(searchQuery);
+                row.style.display = show ? '' : 'none';
+                if (show) blockVisible++;
+            });
+
+            // Hide whole block if no rows visible
+            block.style.display = blockVisible > 0 ? 'block' : 'none';
+            visibleTotal += blockVisible;
+        });
+
+        // Update count
+        resultCount.textContent = `${visibleTotal} conversion${visibleTotal !== 1 ? 's' : ''}`;
+
+        // Empty state
+        emptyState.style.display = visibleTotal === 0 ? 'block' : 'none';
+    }
+</script>
+
+<style>
+    /* Search */
+    .search-section {
+        background: #fff;
+        border-bottom: 1.5px solid var(--sage-pale);
+        padding: 0.75rem 2rem;
+        position: sticky;
+        top: 64px;
+        z-index: 90;
+    }
+
+    .search-section.not-sticky {
+        position: static;
+    }
+
+    .search-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .search-wrap {
+        position: relative;
+        flex: 1;
+        max-width: 360px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 0.85rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.85rem;
+        pointer-events: none;
+    }
+
+    .search-wrap input {
+        width: 100%;
+        background: var(--sage-wash);
+        border: 1.5px solid var(--sage-pale);
+        border-radius: 100px;
+        padding: 0.55rem 1rem 0.55rem 2.25rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.875rem;
+        color: var(--text-dark);
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .search-wrap input:focus { border-color: var(--sage-light); }
+
+    .result-count {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+        margin-left: auto;
+    }
+
+    /* Tabs */
+    .tabs-wrap {
+        background: #fff;
+        border-bottom: 1.5px solid var(--sage-pale);
+        padding: 0 2rem;
+        position: sticky;
+        top: calc(64px + 53px);
+        z-index: 89;
+    }
+
+    .tabs-wrap.not-sticky {
+        position: static;
+    }
+
+    .tabs-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: none;
+        gap: 0;
+    }
+
+    .tabs-inner::-webkit-scrollbar { display: none; }
+
+    .tab {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        white-space: nowrap;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        background: none;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        font-family: "DM Sans", sans-serif;
+        transition: color 0.2s, border-color 0.2s;
+    }
+
+    .tab:hover { color: var(--sage-dark); }
+    .tab.active { color: var(--sage-dark); border-bottom-color: var(--yellow); }
+
+    /* Tables */
+    .tables-section {
+        padding: 2.5rem 2rem 5rem;
+    }
+
+    .tables-section.scrollable {
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .tables-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+    }
+
+    .category-block {}
+
+    .category-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1.5px solid var(--sage-pale);
+    }
+
+    .category-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--sage-pale);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .category-header h2 {
+        font-size: 1.125rem;
+        margin: 0;
+        flex: 1;
+    }
+
+    .category-count {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        background: var(--sage-wash);
+        padding: 0.2rem 0.65rem;
+        border-radius: 100px;
+        font-weight: 600;
+    }
+
+    /* Table */
+    .table-wrap {
+        overflow-x: auto;
+        border-radius: 16px;
+        border: 1.5px solid var(--sage-pale);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+    }
+
+    thead {
+        background: var(--sage-dark);
+    }
+
+    thead th {
+        padding: 0.75rem 1.25rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--sage-pale);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        text-align: left;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid var(--sage-wash);
+        transition: background 0.15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--sage-wash); }
+
+    td {
+        padding: 0.85rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
+    .col-ingredient { width: 40%; }
+    .col-us { width: 20%; }
+    .col-metric { width: 20%; }
+    .col-notes { width: 20%; }
+
+    .ingredient-name {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .measurement {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-weight: 600;
+    }
+
+    .measurement.us {
+        color: var(--text-mid);
+    }
+
+    .measurement.metric {
+        color: var(--sage-dark);
+        background: var(--sage-wash);
+        padding: 0.2rem 0.65rem;
+        border-radius: 100px;
+        font-size: 0.85rem;
+    }
+
+    .note {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    .note-empty {
+        color: var(--sage-pale);
+    }
+
+    /* Empty state */
+    .empty-state {
+        display: none;
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state span {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .tables-section { padding: 2rem 1.25rem 4rem; }
+        .search-section { padding: 0.75rem 1.25rem; }
+        .tabs-wrap { padding: 0 1.25rem; }
+    }
+</style>
