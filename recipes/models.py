@@ -359,7 +359,9 @@ class RecipePage(Page):
 
 
     # ---------- Core ----------
-    description = models.TextField()
+    description = models.TextField(
+        blank=True
+    )
     hero_image = models.ForeignKey(
         "wagtailimages.Image",
         null=True,
@@ -370,15 +372,17 @@ class RecipePage(Page):
 
 
     # ---------- Timing ----------
-    prep_time = models.PositiveIntegerField(help_text="Minutes")
-    cook_time = models.PositiveIntegerField(help_text="Minutes")
+    prep_time = models.PositiveIntegerField(help_text="Minutes", blank=True, null=True)
+    cook_time = models.PositiveIntegerField(help_text="Minutes", blank=True, null=True)
     total_time = models.PositiveIntegerField(
-        help_text="Prep + Cook (minutes)"
+        help_text="Prep + Cook (minutes)",
+        blank=True,
+        null=True
     )
 
 
     # ---------- Servings ----------
-    servings = models.PositiveIntegerField()
+    servings = models.PositiveIntegerField(blank=True, null=True)
     cost_per_serving = models.DecimalField(
         max_digits=5,
         decimal_places=2,
