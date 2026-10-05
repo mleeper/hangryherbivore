@@ -44,6 +44,10 @@ INGREDIENT_UNIT_CHOICES = [
     # Abstract
     ('whole', 'Whole'),
     ('half',  'Half'),
+    ('quarter', 'Quarter'),
+    ('eighth', 'eighth'),
+    ('third', 'Third'),
+    ('two-third', 'Two Third'),
     ('clove', 'Clove'),
     ('head',  'Head'),
     ('stalk', 'Stalk'),
