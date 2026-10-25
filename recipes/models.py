@@ -10,6 +10,7 @@ from wagtail.snippets.models import register_snippet
 from wagtail.snippets.widgets import AdminSnippetChooser
 from wagtail.search import index
 from modelcluster.models import ClusterableModel
+from .utils.abstract import abstract_to_grams
 
 UNIT_CHOICES = [
     # Volume
@@ -257,6 +258,7 @@ class IngredientNutrientRelationship(Orderable):
 class Ingredient(index.Indexed, ClusterableModel):
     name = models.CharField(max_length=100)
     is_liquid = models.BooleanField(default=False)
+    fdcid = models.CharField(max_length=50, blank=True, null=True)
     search_fields = [
         index.SearchField('name'),
         index.AutocompleteField('name'),

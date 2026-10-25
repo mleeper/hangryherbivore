@@ -21,7 +21,7 @@ class Command(BaseCommand):
                 name=ingredient_name,
                 defaults={
                     'is_liquid': is_liquid_ingredient,
-                    'fdcId': row.get('fdcId'),
+                    'fdcid': row.get('fdcId'),
                 }
             )
 

@@ -150,12 +150,21 @@ VOLUME_TO_ML = {
     "teaspoons": 4.929
 }
 
+STANDARD_TO_METRIC_WEIGHT = {
+    "pounds": 453.59237,
+    "lb": 453.59237,
+    "lbs": 453.59237,
+    "oz": 28.3495231,
+    "ounce": 28.3495231,
+    "ounces": 28.3495231
+}
+
 FRACTION_TO_UNIT = {
     "1/2": "half",
     "1/4": "quarter",
-    "1/8": "eigth",
+    "1/8": "eighth",
     "1/3": "third",
-    "2/3": "two third",
+    "2/3": "two-third",
 }
 
 def normalize_string(text):
@@ -229,7 +238,7 @@ def convert_raw_line(line):
     clean_line = clean_line.replace('∕', '/')        # Replace curly mathematical slashes with standard slashes
 
     # 2. Use a slightly modified pattern that explicitly allows any unicode space (\s)
-    pattern = r'^([\d\s\./]+)\s*(cups?|tbsps?|tablespoons?|tsps?|teaspoons?|cans?|sprigs?|slices?|cloves?|pieces?|stalks?|bunches|bunch)?\s+(.+)$'
+    pattern = r'^([\d\s\./]+)\s*(cups?|tbsps?|tablespoons?|tsps?|teaspoons?|cans?|sprigs?|slices?|cloves?|pieces?|stalks?|bunches|bunch|pounds?|oz)?\s+(.+)$'
 
     match = re.match(pattern, clean_line, re.IGNORECASE)
 
@@ -264,9 +273,13 @@ def convert_raw_line(line):
             line_dict["amount"] = weight_grams
             line_dict["ingredient"] = ing_clean
             return line_dict
+        elif unit_lower in STANDARD_TO_METRIC_WEIGHT:
+            line_dict["amount"] = round(amount * STANDARD_TO_METRIC_WEIGHT[unit_lower])
+            line_dict["unit"] = 'g'
+            line_dict["ingredient"] = ing_clean
         else:
             line_dict["unit"] = "whole" if amount >= 1 else FRACTION_TO_UNIT.get(clean_raw_amount)
-            line_dict["amount"] = clean_raw_amount
+            line_dict["amount"] = 1
             line_dict["ingredient"] = ing_clean
             return line_dict
     
@@ -279,5 +292,9 @@ def convert_raw_line(line):
         return line_dict
 
     # Return original line if it doesn't match standard volume patterns (e.g., "salt to taste")
-    return line.strip()
+    return {
+        "ingredient": line.strip(),
+        "amount": 0,
+        "is_note": True
+    }
 
