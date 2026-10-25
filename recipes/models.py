@@ -10,6 +10,7 @@ from wagtail.snippets.models import register_snippet
 from wagtail.snippets.widgets import AdminSnippetChooser
 from wagtail.search import index
 from modelcluster.models import ClusterableModel
+from .utils.abstract import abstract_to_grams
 
 UNIT_CHOICES = [
     # Volume
@@ -44,6 +45,10 @@ INGREDIENT_UNIT_CHOICES = [
     # Abstract
     ('whole', 'Whole'),
     ('half',  'Half'),
+    ('quarter', 'Quarter'),
+    ('eighth', 'eighth'),
+    ('third', 'Third'),
+    ('two-third', 'Two Third'),
     ('clove', 'Clove'),
     ('head',  'Head'),
     ('stalk', 'Stalk'),
@@ -253,6 +258,7 @@ class IngredientNutrientRelationship(Orderable):
 class Ingredient(index.Indexed, ClusterableModel):
     name = models.CharField(max_length=100)
     is_liquid = models.BooleanField(default=False)
+    fdcid = models.CharField(max_length=50, blank=True, null=True)
     search_fields = [
         index.SearchField('name'),
         index.AutocompleteField('name'),
@@ -359,7 +365,9 @@ class RecipePage(Page):
 
 
     # ---------- Core ----------
-    description = models.TextField()
+    description = models.TextField(
+        blank=True
+    )
     hero_image = models.ForeignKey(
         "wagtailimages.Image",
         null=True,
@@ -370,15 +378,17 @@ class RecipePage(Page):
 
 
     # ---------- Timing ----------
-    prep_time = models.PositiveIntegerField(help_text="Minutes")
-    cook_time = models.PositiveIntegerField(help_text="Minutes")
+    prep_time = models.PositiveIntegerField(help_text="Minutes", blank=True, null=True)
+    cook_time = models.PositiveIntegerField(help_text="Minutes", blank=True, null=True)
     total_time = models.PositiveIntegerField(
-        help_text="Prep + Cook (minutes)"
+        help_text="Prep + Cook (minutes)",
+        blank=True,
+        null=True
     )
 
 
     # ---------- Servings ----------
-    servings = models.PositiveIntegerField()
+    servings = models.PositiveIntegerField(blank=True, null=True)
     cost_per_serving = models.DecimalField(
         max_digits=5,
         decimal_places=2,
