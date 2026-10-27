@@ -487,6 +487,35 @@ const hasRelated = related_posts && related_posts.length > 0;
         margin: 2.5rem 0;
     }
 
+    .post-content :global(table) {
+        display: block;          /* lets wide tables scroll on mobile */
+        overflow-x: auto;
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        border: 1.5px solid var(--sage-pale);
+        border-radius: 16px;
+        font-size: 0.875rem;
+    }
+
+    .post-content :global(th) {
+        background: var(--sage-dark);
+        color: var(--sage-pale);
+        text-align: left;
+        padding: 0.75rem 1rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .post-content :global(td) {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--sage-wash);
+        color: var(--text-mid);
+    }
+
+    .post-content :global(tr:hover td) { background: var(--sage-wash); }
+
     /* Related posts */
     .related-section {
         background: var(--sage-wash);
