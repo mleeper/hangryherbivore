@@ -1,4 +1,5 @@
 from django.db import models
+from django import forms
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from taggit.models import TaggedItemBase
@@ -168,15 +169,14 @@ class BlogPost(Page):
     ]
 
     content_panels = Page.content_panels + [
-        FieldPanel("hero_image"),
-        FieldPanel("excerpt"),
-        FieldPanel("body"),
-        FieldPanel("content"),
-        MultiFieldPanel([
-            FieldPanel("categories"),
-            FieldPanel("tags"),
-        ], heading="Categorization"),
-    ]
+    FieldPanel("hero_image"),
+    FieldPanel("excerpt"),
+    FieldPanel("body"),
+    MultiFieldPanel([
+        FieldPanel("categories", widget=forms.CheckboxSelectMultiple),
+        FieldPanel("tags"),
+    ], heading="Categorization"),
+]
 
     subpage_types = []
 
