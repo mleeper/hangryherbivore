@@ -3,9 +3,11 @@ from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from taggit.models import TaggedItemBase
 from wagtail.models import Page
-from wagtail.fields import RichTextField
+from wagtail.fields import RichTextField, StreamField
+from wagtail import blocks
 from wagtail.api import APIField
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel
+from wagtail.contrib.table_block.blocks import TableBlock
 from wagtail.snippets.models import register_snippet
 from wagtail.search import index
 
@@ -134,11 +136,17 @@ class BlogPost(Page):
         null=True,
         help_text="Short summary shown on the blog index"
     )
+    body = StreamField([
+        ('rich_text', blocks.RichTextBlock(
+            features=['h2', 'h3', 'h4', 'bold', 'italic', 'ol', 'ul', 'link', 'hr', 'image']
+        )),
+        ('table', TableBlock()),
+        ('html', blocks.RawHTMLBlock()),  # escape hatch, optional
+    ], blank=True, use_json_field=True)
     content = RichTextField(
         blank=True,
         help_text="Main content of the blog post"
     )
-
     # Tags via taggit
     tags = ClusterTaggableManager(
         through=BlogPostTag,
@@ -153,6 +161,7 @@ class BlogPost(Page):
     )
 
     search_fields = Page.search_fields + [
+        index.SearchField('body'),
         index.SearchField('content'),
         index.SearchField('excerpt'),
         index.FilterField('categories'),
@@ -161,6 +170,7 @@ class BlogPost(Page):
     content_panels = Page.content_panels + [
         FieldPanel("hero_image"),
         FieldPanel("excerpt"),
+        FieldPanel("body"),
         FieldPanel("content"),
         MultiFieldPanel([
             FieldPanel("categories"),
@@ -173,6 +183,7 @@ class BlogPost(Page):
     api_fields = [
         APIField('hero_image'),
         APIField('excerpt'),
+        FieldPanel("body"),
         APIField('content'),
         APIField('tags'),
         APIField('categories'),
