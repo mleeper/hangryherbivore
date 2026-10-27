@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "wagtail.contrib.table_block",
     "wagtail.api.v2",
     "rest_framework", # Optional: for a browsable API
     "wagtail_headless_preview",

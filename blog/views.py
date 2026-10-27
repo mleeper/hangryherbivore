@@ -86,7 +86,7 @@ class BlogDetailAPI(APIView):
                 'title': post.title,
                 'slug': post.slug,
                 'excerpt': post.excerpt,
-                'content': post.content,
+                'content': str(post.body),
                 'first_published_at': post.first_published_at,
                 'last_published_at': post.last_published_at,
                 'hero_image': post.hero_image.get_rendition(
