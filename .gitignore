@@ -1,14 +1,28 @@
 # Env files
 .env
+.env.*
+!.env.example
 
-# Virtual Environment
-env
+# Virtual environment (match your actual folder name)
+env/
 
-# Front End
-frontend/node_modules
-frontend/package-lock.json
+# Front end
+frontend/node_modules/
+frontend/dist/
+frontend/.astro/
+
+# Django
+db.sqlite3
+media/
+staticfiles/      # whatever your STATIC_ROOT folder is called
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Database backups
+*.sql
+*.sql.gz
+*.dump
+backups/
