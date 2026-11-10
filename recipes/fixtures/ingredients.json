@@ -697,7 +697,7 @@
     },
     {
         "name": "All purpose flour",
-        "fdcId": "789890"
+        "fdcId": "790018"
     },
     {
         "name": "Fresh ginger",
@@ -1028,5 +1028,9 @@
     {
         "name": "Almond Oil",
         "fdcId": "2710181"
+    },
+    {
+        "name": "Vital Wheat Gluten",
+        "fdcId": "168147"
     }
 ]
