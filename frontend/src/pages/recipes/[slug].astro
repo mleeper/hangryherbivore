@@ -27,6 +27,7 @@ const {
     category,
     difficulty,
     ingredients,
+    nutrition,
     instructions,
     image,
     first_published_at,
@@ -145,7 +146,6 @@ const hasCategories = category && category.length > 0;
                 <button
                     class="btn-outline"
                     id="share-btn"
-                    onclick="handleShare()"
                 >
                     🔗 Share
                 </button>
@@ -191,11 +191,21 @@ const hasCategories = category && category.length > 0;
                 <div class="sidebar-card-header">
                     <h3>Ingredients</h3>
                     {servings && (
-                        <div class="servings-control">
-                            <button id="servings-down">−</button>
-                            <span id="servings-count">{servings}</span>
-                            <button id="servings-up">+</button>
+                        <div class="multiplier" role="group" aria-label="Scale recipe">
+                            {[0.5, 1, 2, 3, 4].map(m => (
+                                <button
+                                    type="button"
+                                    class={`mult-btn${m === 1 ? ' active' : ''}`}
+                                    data-mult={m}
+                                    aria-pressed={m === 1 ? 'true' : 'false'}
+                                >
+                                    {m === 0.5 ? '½×' : `${m}×`}
+                                </button>
+                            ))}
                         </div>
+                        <span class="servings-label">
+                            Makes <span id="servings-count" data-base={servings}>{servings}</span>
+                        </span>
                     )}
                 </div>
                 <div class="measurement-guide">
@@ -210,10 +220,9 @@ const hasCategories = category && category.length > 0;
                                 <span class="ing-name">{ing.name}</span>
                                 <span
                                     class="ing-amount"
-                                    data-base={ing.quantity}
-                                    data-unit={ing.unit_code}
+                                    data-display={JSON.stringify(ing.display)}
                                 >
-                                    {ing.quantity}{ing.unit_code} {ing.note && `(${ing.note})`}
+                                    {ing.display["1"]}
                                 </span>
                             </li>
                         ))}
@@ -247,7 +256,30 @@ const hasCategories = category && category.length > 0;
                     </div>
                 </div>
             )}
-
+            <!-- Nutrition -->
+            {nutrition?.length > 0 && (
+                <section class="nutrition sidebar-card">
+                    <div class="sidebar-card-header">
+                        <h3>Nutrition</h3>
+                        <p class="sub-header nutrition-note">
+                            Per serving, estimated from USDA data.
+                        </p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th>Nutrient</th><th>Per serving</th></tr>
+                        </thead>
+                        <tbody>
+                            {nutrition.map(n => (
+                                <tr>
+                                    <td>{n.name}</td>
+                                    <td>{n.per_serving} {n.unit}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </section>
+            )}
         </aside>
 
         <!-- INSTRUCTIONS -->
@@ -260,7 +292,6 @@ const hasCategories = category && category.length > 0;
                         <div
                             class="step-checkbox"
                             data-step={i + 1}
-                            onclick={`toggleStep(${i + 1})`}
                         ></div>
                         <div class="step-num" id={`num-${i + 1}`}>
                             {i + 1}
@@ -280,6 +311,22 @@ const hasCategories = category && category.length > 0;
 </Layout>
 
 <script>
+    const buttons = document.querySelectorAll('.mult-btn');
+    const countEl = document.getElementById('servings-count');
+    const baseServings = Number(countEl?.dataset.base ?? 1);
+
+    function setMultiplier(m) {
+        document.querySelectorAll('.ing-amount[data-display]').forEach(el => {
+            const variants = JSON.parse(el.dataset.display);
+            el.textContent = variants[String(m)] ?? variants['1'];
+        });
+        if (countEl) countEl.textContent = String(baseServings * m);
+        buttons.forEach(b => {
+            const on = Number(b.dataset.mult) === m;
+            b.classList.toggle('active', on);
+            b.setAttribute('aria-pressed', String(on));
+        });
+    }
     // Share button
     function handleShare() {
         if (navigator.share) {
@@ -309,23 +356,20 @@ const hasCategories = category && category.length > 0;
         num.classList.toggle('done', done);
     }
 
-    // Servings adjuster
-    const baseServings = parseInt(
-        document.getElementById('servings-count')?.textContent ?? '1'
-    );
-
-    let currentServings = baseServings;
-
-    document.getElementById('servings-up')?.addEventListener('click', () => {
-        currentServings++;
-        updateServings();
+    document.querySelectorAll('.step-checkbox').forEach((el) => {
+        el.addEventListener('click', () => {
+            toggleStep(el.dataset.step);
+        });
     });
 
-    document.getElementById('servings-down')?.addEventListener('click', () => {
-        if (currentServings > 1) {
-            currentServings--;
-            updateServings();
-        }
+    document.getElementById('share-btn')?.addEventListener('click', () => {
+        handleShare();
+    });
+
+    buttons.forEach(b => b.addEventListener('click', () => setMultiplier(Number(b.dataset.mult))));
+
+    document.querySelectorAll('.ing-amount').forEach(el => {
+        el.textContent = JSON.parse(el.dataset.display)[String(multiplier)];
     });
 
     function updateServings() {
@@ -339,6 +383,7 @@ const hasCategories = category && category.length > 0;
             el.textContent = `${rounded % 1 === 0 ? rounded : rounded.toFixed(1)}${el.dataset.unit}`;
         });
     }
+
 </script>
 
 <style>
@@ -572,8 +617,10 @@ const hasCategories = category && category.length > 0;
 
     .sidebar-card-header {
         background: var(--sage-dark);
+        border-bottom: 1px solid var(--cream);
         padding: 0.85rem 1.25rem;
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
     }
@@ -586,6 +633,12 @@ const hasCategories = category && category.length > 0;
         letter-spacing: 0.06em;
         text-transform: uppercase;
         margin: 0;
+    }
+
+    .sidebar-card-header .sub-header {
+        width: 100%;
+        color: var(--sage-pale);
+        font-size:.75rem;
     }
 
     .servings-control {
@@ -757,6 +810,20 @@ const hasCategories = category && category.length > 0;
         text-align: center;
         margin-top: 10px;
     }
+
+    .multiplier { display: flex; gap: 0.25rem; }
+    .mult-btn {
+        background: rgba(255,255,255,0.15);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.2rem 0.5rem;
+        font: 700 0.75rem "DM Sans", sans-serif;
+        cursor: pointer;
+    }
+    .mult-btn:hover { background: rgba(255,255,255,0.25); }
+    .mult-btn.active { background: var(--yellow); color: var(--text-dark); }
+    .servings-label { display: block; padding: 0.5rem 1.25rem 0; font-size: 0.8rem; color: var(--text-muted); }
     /* Responsive */
     @media (max-width: 820px) {
         .recipe-header {
@@ -773,5 +840,38 @@ const hasCategories = category && category.length > 0;
         .sidebar { position: static; }
         .breadcrumb-wrap { padding: 1.25rem 1.25rem 0; }
         .description-section { padding: 2rem 1.25rem; }
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+    }
+
+    thead {
+        background: var(--sage-dark);
+    }
+
+    thead th {
+        padding: 0.75rem 1.25rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--sage-pale);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        text-align: left;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid var(--sage-wash);
+        transition: background 0.15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--sage-wash); }
+
+    td {
+        padding: 0.85rem 1.25rem;
+        font-size: 0.9rem;
     }
 </style>

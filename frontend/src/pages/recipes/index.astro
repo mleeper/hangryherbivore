@@ -4,15 +4,18 @@ import RecipeCard from '../../components/RecipeCard.astro';
 import { getPageData } from '../../lib/api.js';
 
 const recipes = await getPageData('recipes');
-const recipeList = recipes.results ?? [];
+const recipeList = (recipes.results ?? recipes).map(r => ({
+    ...r,
+    catSlugs: (r.category ?? []).map(c => c.slug).join(' '),
+}));
 
-// Build category list from recipes
-const categories = [...new Set(
-    recipeList
-        .flatMap(r => r.category)
-        .filter(Boolean)
-        .map(c => JSON.stringify(c))
-)].map(c => JSON.parse(c));
+const categories = [
+    ...new Map(
+        recipeList
+            .flatMap(r => r.category ?? [])
+            .map(c => [c.slug, c])
+    ).values()
+].sort((a, b) => a.name.localeCompare(b.name));
 ---
 
 <Layout title="All Recipes" showLeadMagnet={true} description="Find your next meal idea here">
@@ -59,6 +62,17 @@ const categories = [...new Set(
                 <button id="clear-btn" class="clear-btn">✕ Clear</button>
             </div>
         </div>
+        <div class="filter-bar-inner">
+            {categories.length > 0 && (
+                <div class="cat-pills" id="cat-pills" role="group" aria-label="Filter by category">
+                    {categories.map(c => (
+                        <button type="button" class="cat-pill" data-slug={c.slug} aria-pressed="false">
+                            {c.icon} {c.name}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
     </div>
 
     <!-- RECIPE GRID -->
@@ -72,6 +86,7 @@ const categories = [...new Set(
                     data-cost={recipe.cost_per_serving ?? ''}
                     data-time={recipe.total_time ?? ''}
                     data-date={recipe.first_published_at}
+                    data-cats={recipe.catSlugs}
                 >
                     <RecipeCard recipe={recipe} />
                 </div>
@@ -97,14 +112,45 @@ const categories = [...new Set(
     const emptyState = document.getElementById('empty-state');
     const grid = document.getElementById('recipe-grid');
     const cards = Array.from(document.querySelectorAll('.recipe-card-wrap'));
+    
+    // Pre-filter from ?category=slug
+    const catParam = new URLSearchParams(window.location.search).get('category');
+    const pillsWrap = document.getElementById('cat-pills');
+    const pills = pillsWrap ? [...pillsWrap.querySelectorAll('.cat-pill')] : [];
+    const validSlugs = new Set(pills.map(p => p.dataset.slug));
+
+    // Initial selection from ?category=a,b (also accepts a single slug)
+    const selectedCats = new Set(catParam.split(',').filter(s => validSlugs.has(s))
+    );
+
+    pills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            const slug = pill.dataset.slug;
+            selectedCats.has(slug) ? selectedCats.delete(slug) : selectedCats.add(slug);
+            applyFilters();
+        });
+    });
 
     function applyFilters() {
         const query = searchInput.value.toLowerCase().trim();
         const cost = costFilter.value;
         const sort = sortFilter.value;
-        const hasFilters = query || cost !== 'all';
+        const hasFilters = query || cost !== 'all' || selectedCats.size > 0;
 
         clearBtn.style.display = hasFilters ? 'inline' : 'none';
+
+        // Keep the URL shareable
+        const url = new URL(window.location.href);
+        if (selectedCats.size === 0) url.searchParams.delete('category');
+        else url.searchParams.set('category', [...selectedCats].join(','));
+        history.replaceState(null, '', url);
+
+        // Reflect state on the pills
+        pills.forEach(p => {
+            const on = selectedCats.has(p.dataset.slug);
+            p.classList.toggle('active', on);
+            p.setAttribute('aria-pressed', String(on));
+        });
 
         let visible = cards.filter(card => {
             const title = card.dataset.title;
@@ -122,8 +168,21 @@ const categories = [...new Set(
                 cost === 'under2' ? cardCost < 2 :
                 cost === 'under3' ? cardCost < 3 : true;
 
-            return matchesSearch && matchesCost;
+            const cardCats = (card.dataset.cats ?? '').split(' ');
+            const matchesCat = [...selectedCats].every(s => cardCats.includes(s)); // AND
+            // for OR: selectedCats.size === 0 || [...selectedCats].some(s => cardCats.includes(s))
+            return matchesSearch && matchesCost && matchesCat;
         });
+
+        // pills.forEach(p => {
+        //     const slug = p.dataset.slug;
+        //     console.log({ p, slug, visible, selectedCats });
+        //     if (selectedCats.has(slug)) { p.disabled = false; return; }
+        //     const wouldMatch = visible.some(card =>
+        //         (card.dataset.cats ?? '').split(' ').includes(slug)
+        //     );
+        //     p.disabled = !wouldMatch;
+        // });
 
         // Sort
         if (sort === 'cheapest') {
@@ -161,6 +220,7 @@ const categories = [...new Set(
     function clearFilters() {
         searchInput.value = '';
         costFilter.value = 'all';
+        selectedCats.clear();
         applyFilters();
     }
 
@@ -344,6 +404,21 @@ const categories = [...new Set(
 
     .empty-state h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
     .empty-state p { color: var(--text-muted); font-size: 0.9rem; }
+
+    .cat-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; width: 100%; padding-bottom: 0.75rem; }
+    .cat-pill {
+        background: var(--sage-wash);
+        color: var(--text-mid);
+        border: 1.5px solid var(--sage-pale);
+        border-radius: 100px;
+        padding: 0.4rem 0.9rem;
+        font: 600 0.8125rem "DM Sans", sans-serif;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .cat-pill:hover:not(:disabled) { border-color: var(--sage-light); }
+    .cat-pill.active { background: var(--sage-dark); border-color: var(--sage-dark); color: var(--yellow); }
+    .cat-pill:disabled { opacity: 0.4; cursor: not-allowed; }
 
     @media (max-width: 900px) {
         .recipe-grid { grid-template-columns: repeat(2, 1fr); }
