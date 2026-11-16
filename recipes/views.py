@@ -62,6 +62,7 @@ class RecipeListAPI(ListAPIView):
             'recipe_ingredients__ingredient__ingredient_nutrients__nutrient',
             'steps',
             'recipe_category',
+            'recipe_category__category',
         ).select_related(
             'hero_image',
         )

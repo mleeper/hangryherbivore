@@ -16,9 +16,14 @@ ABSTRACT_UNIT_TO_GRAMS = {
     ('half',  'Green Cabbage'):       450.0,
     ('half',  'Napa Cabbage'):        350.0,
 
+    # Tofu
+    ('block', 'Firm Tofu'):           455.0,
+    ('block', 'Soft Tofu'):           350.0,
+    ('block', 'Super Firm High Protein Tofu'): 455.0,
+    ('block', 'Silken Tofu'):        340.0,     
 
     # Celery
-    ('stalk', 'Potatoes'):            40.0,
+    ('stalk', 'Celery'):              40.0,
 
     # Lemon / Lime
     ('whole', 'Lemon'):               58.0,
@@ -30,7 +35,7 @@ ABSTRACT_UNIT_TO_GRAMS = {
     ('whole', 'Yellow Bell Pepper'):  119.0,
     ('whole', 'Green Bell Pepper'):   119.0,
     ('slice', 'Red Bell Pepper'):     15.0,
-    ('slice', 'Yellowll Pepper'):     15.0,
+    ('slice', 'Yellow Pepper'):     15.0,
     ('slice', 'Green Bell Pepper'):     15.0,
 
     # Tomatoes

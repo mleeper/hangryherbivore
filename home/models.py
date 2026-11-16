@@ -282,6 +282,7 @@ class HomePage(Page):
         return [
             {
                 "name": category.name,
+                "slug": category.slug,
                 "icon": category.icon,
                 "description": category.description,
             }

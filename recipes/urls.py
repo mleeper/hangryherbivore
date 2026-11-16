@@ -5,5 +5,5 @@ from recipes.views import RecipeListAPI, RecipeDetailAPI, MeasurementConversionA
 urlpatterns = [
     path("api/recipes/", RecipeListAPI.as_view()),
     path("api/recipes/<slug:slug>/", RecipeDetailAPI.as_view()),
-    path("api/measurements", MeasurementConversionAPI .as_view()),
+    path("api/measurements/", MeasurementConversionAPI .as_view()),
 ]

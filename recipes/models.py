@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 from wagtail.api import APIField
 from wagtail import blocks
 from wagtail.models import Page, Orderable
@@ -11,6 +12,7 @@ from wagtail.snippets.widgets import AdminSnippetChooser
 from wagtail.search import index
 from modelcluster.models import ClusterableModel
 from .utils.abstract import abstract_to_grams
+from .utils.format import display_variants
 
 UNIT_CHOICES = [
     # Volume
@@ -29,6 +31,7 @@ UNIT_CHOICES = [
     ('lb', 'Pounds (lb)'),
     # Abstract Counts
     ('piece', 'Piece(s)'),
+    ('block', 'Block(s)'),
     ('can', 'Can(s)'),
     ('pinch', 'Pinch(es)'),
     ('clove', 'Clove(s)'),
@@ -44,11 +47,12 @@ INGREDIENT_UNIT_CHOICES = [
 
     # Abstract
     ('whole', 'Whole'),
-    ('half',  'Half'),
-    ('quarter', 'Quarter'),
-    ('eighth', 'eighth'),
-    ('third', 'Third'),
-    ('two-third', 'Two Third'),
+    ('half',  'Half (1/2)'),
+    ('quarter', 'Quarter (1/4)'),
+    ('eighth', 'Eighth (1/8)'),
+    ('third', 'Third (1/3)'),
+    ('two-third', 'Two Third (2/3)'),
+    ('block', 'Block(s)'),
     ('clove', 'Clove'),
     ('head',  'Head'),
     ('stalk', 'Stalk'),
@@ -69,6 +73,14 @@ CATEGORIES = [
     ('quick_meals', 'Under 30 Minutes'),
     ('high_protein', 'High Protein'),
 ]
+
+FRACTION_MAP = {
+    'half': 1/2, 
+    'quater': 1/4, 
+    'eighth': 1/8, 
+    'third': 1/3, 
+    'two-third': 2/3
+}
 
 @register_snippet
 class MeasurementConversion(models.Model):
@@ -176,7 +188,11 @@ class Category(index.Indexed, models.Model):
 	index.SearchField('name'),
 	index.AutocompleteField('name')
     ]
-    
+
+    @property
+    def slug(self):
+        return slugify(self.name)
+
     def __str__(self):
         return f"{self.name}"
 
@@ -533,25 +549,28 @@ class RecipePage(Page):
             unit_code = i.unit or ''
 
             # Convert abstract units to grams
-            ABSTRACT_UNITS = {'clove', 'whole', 'half', 'slice', 'head', 'stalk', 'sprig', 'leaf', 'piece', 'can'}
+            ABSTRACT_UNITS = {'clove', 'whole', 'half', 'quater', 'eighth', 'third', 'two-third', 'slice', 'head', 'stalk', 'sprig', 'leaf', 'piece', 'can', 'block'}
+
+            FRACTIONAL_UNITS = {'half', 'quater', 'eighth', 'third', 'two-third'}
 
             if unit_code in ABSTRACT_UNITS:
-                converted = abstract_to_grams(unit_code, i.ingredient.name, recipe_qty)
-                if converted is not None:
-                    normalized_qty = converted
-                else:
-                    # No conversion found — skip nutrition for this ingredient
-                    normalized_qty = None
+                metric_amount = abstract_to_grams(unit_code, i.ingredient.name, recipe_qty)  # None if no mapping
+                metric_unit = 'ml' if i.ingredient.is_liquid else 'g'
+                normalized_qty = metric_amount
             else:
+                metric_amount = recipe_qty if unit_code in ('g', 'ml') else None
+                metric_unit = unit_code if unit_code in ('g', 'ml') else None
                 normalized_qty = recipe_qty
 
             ingredient_data = {
                 "name": i.ingredient.name,
                 "quantity": recipe_qty,
-                "unit": i.get_unit_display() if i.unit else "",
                 "unit_code": unit_code,
+                "metric_amount": round(metric_amount, 1) if metric_amount is not None else None,
+                "display": display_variants(recipe_qty, unit_code, metric_amount, metric_unit),
+                "metric_unit": metric_unit,
                 "note": i.note or "",
-                "nutrients": []
+                "nutrients": [],
             }
 
             # Only calculate nutrition if we have a valid quantity
@@ -566,7 +585,7 @@ class RecipePage(Page):
                     base_amount = float(n['amount']) if n['amount'] is not None else 0.0
                     scale_factor = normalized_qty / 100
                     scaled_amount = round(base_amount * scale_factor, 2)
-
+                    
                     ingredient_data["nutrients"].append({
                         "name": n['nutrient__name'],
                         "unit": n['nutrient__unit'],
@@ -588,7 +607,7 @@ class RecipePage(Page):
             for nutrient in ingredient["nutrients"]:
                 name = nutrient["name"]
                 unit = nutrient["unit"]
-                amount = nutrient["scaled_nutrient_amount"]
+                amount = nutrient["scaled_amount"]
             
                 # Initialize the dict key if it doesn't exist yet
                 if name not in totals:
@@ -611,9 +630,11 @@ class RecipePage(Page):
     def get_schema_categories(self):
         return [
             {
-                "name": category.name,
-                "icon": category.icon,
+                "name": rc.category.name,
+                "icon": rc.category.icon,
+                "slug": rc.category.slug,
             }
-            for category in self.recipe_category.all()
+            for rc in self.recipe_category.all()
+            if rc.category
         ]
 
