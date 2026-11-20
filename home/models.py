@@ -6,9 +6,28 @@ from wagtail.api import APIField
 from wagtail.fields import RichTextField
 from wagtail.snippets.models import register_snippet
 from recipes.models import Category
-
-# import MultiFieldPanel:
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel, MultipleChooserPanel
+
+class AboutPage(Page):
+    hero_image = models.ForeignKey(
+        "wagtailimages.Image", null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+",
+    )
+    intro = models.CharField(max_length=255, blank=True)
+    body = RichTextField(
+        features=["h2", "h3", "bold", "italic", "ol", "ul", "link", "hr"],
+        blank=True,
+    )
+
+    content_panels = Page.content_panels + [
+        FieldPanel("hero_image"),
+        FieldPanel("intro"),
+        FieldPanel("body"),
+    ]
+
+    parent_page_types = ["home.HomePage"]
+    max_count = 1
+
 
 class CTA(models.Model):
     text = models.CharField(
@@ -127,6 +146,15 @@ class HomePageHowItWorksItem(models.Model):
     panels = [
         FieldPanel('how_it_works_item')
     ]
+
+def cta_to_dict(cta):
+    """Serialize a CTA row to {text, link} with a site-relative path."""
+    link = None
+    if cta.link_id:
+        page = cta.link.specific
+        # relative_url gives a path like /about/ without the domain
+        link = page.relative_url(None) if hasattr(page, "relative_url") else page.url
+    return {"text": cta.text or "", "link": link}
 
 class HomePage(Page):
     # add the Hero section of HomePage:
@@ -288,3 +316,12 @@ class HomePage(Page):
             }
             for category in Category.objects.all()
         ]
+
+    def get_schema_hero_cta(self):
+        return [cta_to_dict(c) for c in self.hero_cta.all()]
+
+    def get_schema_how_it_works_cta(self):
+        return [cta_to_dict(c) for c in self.how_it_works_cta.all()]
+
+    def get_schema_about_cta(self):
+        return [cta_to_dict(c) for c in self.about_cta.all()]
