@@ -17,6 +17,7 @@ const {
     how_it_works_cta,
     how_it_works_list,
     about_title,
+    about_image,
     about_content,
     about_cta,
     email_signup_title,
@@ -47,7 +48,7 @@ const {
             <h1>{hero_title}</h1>
             <p>{hero_subtitle}</p>
             <div class="btn-row">
-                {hero_cta && hero_cta.map(cta => (
+                {hero_cta && hero_cta.filter(c => c.link).map(cta => (
                     <a href={cta.link} class="btn-primary">{cta.text}</a>
                 ))}
             </div>
@@ -122,7 +123,7 @@ const {
             <div class="how-left">
                 <h2>{how_it_works_title}</h2>
                 <p>{how_it_works_text}</p>
-                {how_it_works_cta?.map(cta => (
+                {how_it_works_cta?.filter(c => c.link).map(cta => (
                     <a href={cta.link} class="btn-outline">{cta.text}</a>
                 ))}
             </div>
@@ -143,11 +144,11 @@ const {
     <!-- ABOUT -->
     <section class="about">
         <div class="about-grid">
-            <div class="about-img-placeholder"></div>
+            {about_image && <img src={about_image} alt="" />}
             <div class="about-content">
                 <h2>{about_title}</h2>
                 <div set:html={about_content} />
-                {about_cta?.map(cta => (
+                {about_cta?.filter(c => c.link).map(cta => (
                     <a href={cta.link} class="btn-outline">{cta.text}</a>
                 ))}
             </div>

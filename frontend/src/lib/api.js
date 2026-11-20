@@ -4,6 +4,7 @@ const isDev = import.meta.env.DEV;
 const API_BASE = import.meta.env.API_BASE_URL;
 const MAP = {
     home:           { data: `${API_BASE}/api/home/` },
+    about:          { data: `${API_BASE}/api/about` },
     recipes:        { data: `${API_BASE}/api/recipes/` },
     recipeDetail:   { data: `${API_BASE}/api/recipes/` },
     blogIndex:      { data: `${API_BASE}/api/blog/` },
