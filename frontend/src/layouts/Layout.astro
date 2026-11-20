@@ -2,6 +2,7 @@
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import LeadMagnet from '../components/LeadMagnet.astro';
+import { FEATURES } from '../lib/config';
 import "../styles/global.css";
 
 interface Props {
@@ -49,7 +50,7 @@ const {
     <main id="main">
         <slot />
     </main>
-    {showLeadMagnet && <LeadMagnet title={leadMagnet.title} content={leadMagnet.content} buttonText={leadMagnet.buttonText} />}
+    {FEATURES.leadMagnet && showLeadMagnet && <LeadMagnet title={leadMagnet.title} content={leadMagnet.content} buttonText={leadMagnet.buttonText} />}
     <Footer />
 </body>
 </html>

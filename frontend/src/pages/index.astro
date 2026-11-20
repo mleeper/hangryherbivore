@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import RecipeCard from '../components/RecipeCard.astro';
 import { getPageData } from '../lib/api.js';
+import { FEATURES } from '../lib/config';
 import "../styles/homepage.css"
 
 const homepage = await getPageData('home');
@@ -60,10 +61,12 @@ const {
             ) : (
                 <div class="hero-img-placeholder"></div>
             )}
-            <div class="hero-badge">
-                <span class="badge-num">200+</span>
-                <span class="badge-label">Free Recipes</span>
-            </div>
+            { FEATURES.heroBadge && (
+                <div class="hero-badge">
+                    <span class="badge-num">200+</span>
+                    <span class="badge-label">Free Recipes</span>
+                </div>
+            )}
         </div>
     </section>
 

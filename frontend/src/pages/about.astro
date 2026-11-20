@@ -1,0 +1,130 @@
+---
+// src/pages/about.astro
+import Layout from '../layouts/Layout.astro';
+import { getPageData } from '../lib/api.js';
+
+const { title, body, hero_image, meta } = await getPageData('about');
+---
+<Layout title={meta.seo_title} description={meta.search_description}>
+    <div class="about-wrap">
+        {title && <h1 class="page-title">{title}</h1>}
+        {hero_image && <img src={hero_image} alt={title} />}
+        <div class="about-body post-content" set:html={body} />
+    </div>
+</Layout>
+
+<style>
+    .page-title {
+        text-align: center;
+        font-family: Lora, serif;
+        font-size: 1.25rem;
+        color: var(--sage-dark);
+        margin: 2rem 0 .75rem;
+    }
+    /* Post content */
+    .post-content {
+        min-width: 0; /* prevent grid blowout */
+        width: 75vw;
+        margin: 0 auto;
+    }
+
+    /* Rich text styles */
+    .post-content :global(h2) {
+        font-family: "Lora", serif;
+        font-size: 1.625rem;
+        color: var(--sage-dark);
+        margin: 2.5rem 0 1rem;
+        line-height: 1.25;
+    }
+
+    .post-content :global(h3) {
+        font-family: "Lora", serif;
+        font-size: 1.25rem;
+        color: var(--sage-dark);
+        margin: 2rem 0 0.75rem;
+    }
+
+    .post-content :global(p) {
+        font-size: 1rem;
+        color: var(--text-mid);
+        line-height: 1.8;
+        margin-bottom: 1.25rem;
+    }
+
+    .post-content :global(ul),
+    .post-content :global(ol) {
+        padding-left: 1.5rem;
+        margin-bottom: 1.25rem;
+        color: var(--text-mid);
+    }
+
+    .post-content :global(li) {
+        font-size: 1rem;
+        line-height: 1.7;
+        margin-bottom: 0.4rem;
+    }
+
+    .post-content :global(strong) { color: var(--sage-dark); }
+
+    .post-content :global(a) {
+        color: var(--sage-mid);
+        border-bottom: 1px solid var(--sage-pale);
+        transition: color 0.2s, border-color 0.2s;
+    }
+
+    .post-content :global(a:hover) {
+        color: var(--sage-dark);
+        border-color: var(--sage-mid);
+    }
+
+    .post-content :global(blockquote) {
+        border-left: 3px solid var(--yellow);
+        padding: 0.75rem 1.25rem;
+        margin: 1.5rem 0;
+        background: var(--sage-wash);
+        border-radius: 0 12px 12px 0;
+        font-style: italic;
+        color: var(--text-mid);
+    }
+
+    .post-content :global(img) {
+        width: 100%;
+        border-radius: 16px;
+        margin: 1.5rem 0;
+    }
+
+    .post-content :global(hr) {
+        border: none;
+        border-top: 1.5px solid var(--sage-pale);
+        margin: 2.5rem 0;
+    }
+
+    .post-content :global(table) {
+        display: block;          /* lets wide tables scroll on mobile */
+        overflow-x: auto;
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        border: 1.5px solid var(--sage-pale);
+        border-radius: 16px;
+        font-size: 0.875rem;
+    }
+
+    .post-content :global(th) {
+        background: var(--sage-dark);
+        color: var(--sage-pale);
+        text-align: left;
+        padding: 0.75rem 1rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .post-content :global(td) {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--sage-wash);
+        color: var(--text-mid);
+    }
+
+    .post-content :global(tr:hover td) { background: var(--sage-wash); }
+</style>

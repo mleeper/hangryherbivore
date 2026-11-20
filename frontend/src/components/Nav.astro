@@ -1,4 +1,5 @@
 ---
+import { FEATURES } from "../lib/config";
 const navLinks = [
     { label: 'Recipes', href: '/recipes' },
     { label: 'Blog', href: '/blog' },
@@ -28,7 +29,7 @@ const currentPath = Astro.url.pathname;
         Hangry Herbivore
     </a>
 
-    <a href="/meal-plan" class="nav-cta">Get $40 Meal Plan</a>
+    {FEATURES.mealPlan && <a href="/meal-plan" class="nav-cta">Get $40 Meal Plan</a>}
 </nav>
 
 <style>
@@ -39,11 +40,14 @@ const currentPath = Astro.url.pathname;
         background: var(--cream);
         border-bottom: 1.5px solid var(--sage-pale);
         padding: 0 2rem;
-        display: flex;
+        display: grid; 
+        grid-template-columns: 1fr auto 1fr;
         align-items: center;
         justify-content: space-between;
         height: 64px;
     }
+    
+    .nav-cta { justify-self: end; }
 
     .nav-links {
         display: flex;
