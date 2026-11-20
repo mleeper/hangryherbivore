@@ -1,10 +1,11 @@
 ---
+import { FEATURES } from "../lib/config";
 const footerLinks = [
-    { label: 'Recipes', href: '/recipes' },
-    { label: 'Meal Plans', href: '/meal-plan' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'About', href: '/about' },
-    { label: 'Contact', href: '/contact' },
+    { label: 'Recipes', href: '/recipes', visible: true },
+    { label: 'Meal Plans', href: '/meal-plan', visible: FEATURES.mealPlan },
+    { label: 'Blog', href: '/blog', visible: true },
+    { label: 'About', href: '/about', visible: true },
+    { label: 'Contact', href: '/contact', visible: false },
 ];
 ---
 
@@ -12,7 +13,7 @@ const footerLinks = [
     <div class="footer-inner">
         <span class="footer-logo">Hangry Herbivore</span>
         <ul class="footer-links">
-            {footerLinks.map(link => (
+            {footerLinks.filter((link) => link.visible).map(link => (
                 <li><a href={link.href}>{link.label}</a></li>
             ))}
         </ul>
