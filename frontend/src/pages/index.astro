@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import RecipeCard from '../components/RecipeCard.astro';
 import { getPageData } from '../lib/api.js';
 import { FEATURES } from '../lib/config';
+import { websiteLd } from '../lib/jsonld';
 import "../styles/homepage.css"
 
 const homepage = await getPageData('home');
@@ -41,7 +42,7 @@ const {
         buttonText: email_signup_button_text
     }}
 >
-
+    <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(websiteLd())} />
     <!-- HERO -->
     <section class="hero">
         <div class="hero-content">

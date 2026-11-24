@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getPageData } from '../../lib/api.js';
+import { blogPostingLd, breadcrumbLd } from '../../lib/jsonld.js';
 
 export async function getStaticPaths() {
     const { results } = await getPageData('blogIndex');
@@ -27,6 +28,14 @@ const {
     meta,
 } = post;
 
+const path = `/blog/${post.slug}/`;
+const postSchema = blogPostingLd(post, path);
+const crumbs = breadcrumbLd([
+    { name: 'Home', path: '/' },
+    { name: 'Blog', path: '/blog/' },
+    { name: title },
+]);
+
 const publishedDate = new Date(first_published_at).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -47,7 +56,8 @@ const hasRelated = related_posts && related_posts.length > 0;
     description={meta.search_description || excerpt}
     heroImage={hero_image}
 >
-
+    <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(postSchema)} />
+    <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(crumbs)} />
     <!-- BREADCRUMB -->
     <div class="breadcrumb-wrap">
         <div class="breadcrumb">
